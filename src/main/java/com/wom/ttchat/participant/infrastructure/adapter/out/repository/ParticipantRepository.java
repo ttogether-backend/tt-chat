@@ -23,6 +23,7 @@ public interface ParticipantRepository extends JpaRepository<ParticipantJpaEntit
 
     List<ParticipantJpaEntity> findAllByRoomIdAndStatusEquals(Long chatRoomId, String status);
     ParticipantJpaEntity findByRoomIdAndMemberId(Long roomId, UUID memberId);
+    ParticipantJpaEntity findByRoomIdAndMemberIdAndStatus(Long roomId, UUID memberId, String status);
 
     @Transactional
     @Modifying

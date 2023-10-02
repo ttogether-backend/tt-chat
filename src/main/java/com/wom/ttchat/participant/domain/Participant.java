@@ -4,9 +4,7 @@ import com.wom.ttchat.chatroom.domain.ChatRoom;
 import com.wom.ttchat.member.domain.Member;
 import java.util.UUID;
 
-import com.wom.ttchat.participant.infrastructure.adapter.out.entity.ParticipantJpaEntity;
 import lombok.*;
-import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 
@@ -89,8 +87,8 @@ public class Participant {
         this.status = ParticipantStatus.LEFT;
     }
 
-    public void changeStatusToKicked() {
-        this.status = ParticipantStatus.KICKED;
+    public void changeStatusToBanned() {
+        this.status = ParticipantStatus.BANNED;
     }
 
     public boolean isJoined() {
@@ -101,8 +99,8 @@ public class Participant {
         return this.status == ParticipantStatus.LEFT;
     }
 
-    public boolean isKicked() {
-        return this.status == ParticipantStatus.KICKED;
+    public boolean isBanned() {
+        return this.status == ParticipantStatus.BANNED;
     }
 
     public void updateReadAt(LocalDateTime readAt) {
