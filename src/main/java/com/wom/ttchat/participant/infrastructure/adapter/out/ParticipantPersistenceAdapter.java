@@ -98,6 +98,21 @@ public class ParticipantPersistenceAdapter implements UpdateParticipantPort, Fin
     }
 
     @Override
+    public Participant findParticipantByRoomIdAndMemberIdAndStatus(ChatRoom chatRoom, MemberId memberId, String status) {
+        ParticipantJpaEntity jpaEntity =
+                participantRepository.findByRoomIdAndMemberIdAndStatus(chatRoom.getChatRoomId(), memberId.getValue(), status);
+
+        if (jpaEntity == null) {
+            return null;
+        }
+        return participantMapper.mapToDomainEntity(
+                jpaEntity,
+                memberMapper.mapToDomainEntity(jpaEntity.getMember()),
+                chatRoom
+        );
+    }
+
+    @Override
     public Participant findJoinParticipant(ChatRoom chatRoom, MemberId memberId) {
         ParticipantJpaEntity jpaEntity
             = participantRepository.findByRoomIdAndMemberIdAndStatusEquals(

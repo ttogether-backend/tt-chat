@@ -63,10 +63,18 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        if (findParticipantPort.findParticipantByRoomIdAndMemberId(participant.getChatRoom(), member.getId()) != null) {
+        Participant joined = findParticipantPort.findParticipantByRoomIdAndMemberId(participant.getChatRoom(), member.getId());
+        Participant updatedParticipant = participant;
+        if (joined != null && joined.isJoined()) {
             throw new IllegalStateException("이미 참여 중인 채팅방입니다.");
+        } else if (joined != null && joined.isBanned()) {
+            throw new IllegalStateException("강퇴된 채팅방에는 다시 참여할 수 없습니다.");
+        } else if (joined != null && joined.isLeft()) {
+            updateParticipantPort.updateParticipantStatus(participant);
+        } else if (joined == null) {
+            updatedParticipant = updateParticipantPort.updateParticipant(participant);
         }
-        return updateParticipantPort.updateParticipant(participant);
+        return updatedParticipant;
     }
 
     @Override
