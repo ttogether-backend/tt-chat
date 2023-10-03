@@ -59,6 +59,12 @@ public class ParticipantPersistenceAdapter implements UpdateParticipantPort, Fin
     }
 
     @Override
+    public void updateParticipantStatusAndDeleteAt(Participant participant) {
+        participantRepository.updateDeleteAtAndStatusByRoomIdAndMemberId(participant.getDeletedAt(), participant.getStatus().name(),
+                participant.getChatRoom().getChatRoomId(), participant.getMember().getId().getValue());
+    }
+
+    @Override
     public void updateParticipantReadAt(Long roomId, UUID memberId, LocalDateTime readAt) {
         participantRepository.updateReadyAtByRoomIdAndMemberId(readAt, roomId, memberId);
     }

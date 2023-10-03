@@ -9,5 +9,6 @@ public interface UpdateParticipantPort {
     void updateParticipant(UUID MemberId);
     Participant updateParticipant(Participant participant);
     void updateParticipantStatus(Participant participant);
+    void updateParticipantStatusAndDeleteAt(Participant participant);
     void updateParticipantReadAt(Long roomId, UUID memberId, LocalDateTime readAt);
 }
