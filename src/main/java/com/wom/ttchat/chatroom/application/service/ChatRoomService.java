@@ -4,6 +4,7 @@ import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
 import com.wom.ttchat.accompany.application.port.out.LoadAccompanyPort;
 import com.wom.ttchat.accompany.domain.Accompany;
 import com.wom.ttchat.chatroom.adapter.in.web.response.ChatRoomResponse;
+import com.wom.ttchat.chatroom.application.port.in.Command.BanChatRoomCommand;
 import com.wom.ttchat.chatroom.application.port.in.Command.CreateChatRoomCommand;
 import com.wom.ttchat.chatroom.application.port.in.Command.EnterChatRoomCommand;
 import com.wom.ttchat.chatroom.application.port.in.Command.QuitChatRoomCommand;
@@ -37,12 +38,14 @@ import java.util.*;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCase, QuitChatRoomUseCase, CreateChatRoomUseCase {
     private final LoadMemberPort loadMemberPort;
     private final UpdateParticipantPort updateParticipantPort;
@@ -152,7 +155,7 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
         Participant participant = findParticipantPort.findParticipantByRoomIdAndMemberId(
                 findChatRoomPort.findByUid(command.getRoomId()),
                 member.getId());
-        if (participant.isJoined()) {
+        if (participant != null && participant.isJoined()) {
             participant.setStatus(ParticipantStatus.LEFT);
             updateParticipantPort.updateParticipantStatus(participant);
         } else {
@@ -173,6 +176,41 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 .senderId(command.getMemberId().toString())
                 .build());
         return participant;
+    }
+
+    @Override
+    public Participant banChatRoom(BanChatRoomCommand command) throws Exception {
+        Member member = loadMemberPort.loadMember(command.getMemberId());
+        ChatRoom chatRoom = findChatRoomPort.findByUid(command.getRoomId());
+        if (command.getHostId() == command.getMemberId()) {
+            throw new IllegalStateException("스스로 강퇴할 수 없습니다.");
+        } else if (!chatRoom.getHostMemberId().getId().equals(command.getHostId())) {
+            log.info("host : " + chatRoom.getHostMemberId().getId().toString()
+            + "member : " + command.getHostId().toString());
+            throw new IllegalStateException("호스트만 강퇴할 수 있습니다.");
+        }
+        Participant participant = findParticipantPort.findParticipantByRoomIdAndMemberId(
+                findChatRoomPort.findByUid(command.getRoomId()),
+                member.getId());
+        if (participant != null && participant.isJoined()) {
+            participant.setStatus(ParticipantStatus.BANNED);
+            updateParticipantPort.updateParticipantStatus(participant);
+        } else {
+            throw new IllegalStateException("현재 채팅에 참여중인 사람만 강퇴할 수 있습니다.");
+        }
+        return participant;
+    }
+
+    @Override
+    public void transactionalBanChatRoom(BanChatRoomCommand command) throws Exception {
+        Participant participant = banChatRoom(command);
+        wsMessageService.saveMessage(MessageRequest.builder()
+                .roomId(command.getRoomId().toString())
+                .content(participant.getMember().getNickname() + SystemMessage.BAN.getMsg())
+                .messageType(MessageType.SYS)
+                .nickname(participant.getMember().getNickname())
+                .senderId(command.getMemberId().toString())
+                .build());
     }
 
 
