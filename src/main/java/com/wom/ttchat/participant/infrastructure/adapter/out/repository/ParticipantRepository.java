@@ -21,6 +21,11 @@ public interface ParticipantRepository extends JpaRepository<ParticipantJpaEntit
     @Query(value = "UPDATE participants SET status = :status WHERE room_id = :roomId AND member_id = :memberId", nativeQuery = true)
     void updateStatusByRoomIdAndMemberId(@Param("status") String status, @Param("roomId") Long roomId, @Param("memberId") UUID memberId);
 
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE participants SET status = :status, delete_at = :deleteAt WHERE room_id = :roomId AND member_id = :memberId", nativeQuery = true)
+    void updateDeleteAtAndStatusByRoomIdAndMemberId(@Param("deleteAt") LocalDateTime deleteAt, @Param("status") String status, @Param("roomId") Long roomId, @Param("memberId") UUID memberId);
+
     List<ParticipantJpaEntity> findAllByRoomIdAndStatusEquals(Long chatRoomId, String status);
     ParticipantJpaEntity findByRoomIdAndMemberId(Long roomId, UUID memberId);
     ParticipantJpaEntity findByRoomIdAndMemberIdAndStatus(Long roomId, UUID memberId, String status);
