@@ -3,6 +3,7 @@ package com.wom.ttchat.chatroom.adapter.in.web;
 
 import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
 import com.wom.ttchat.chatroom.adapter.out.entity.ChatRoomJpaEntity;
+import com.wom.ttchat.chatroom.application.port.in.Command.BanChatRoomCommand;
 import com.wom.ttchat.chatroom.application.port.in.Command.CreateChatRoomCommand;
 import com.wom.ttchat.chatroom.application.port.in.Command.EnterChatRoomCommand;
 import com.wom.ttchat.chatroom.application.port.in.Command.QuitChatRoomCommand;
@@ -80,6 +81,17 @@ public class ChatRoomController {
                                 @RequestHeader ("memberId") UUID memberId) throws Exception {
         Member.MemberId member = new Member.MemberId(memberId);
         Participant participant = quitChatRoomUseCase.transactionalQuiChatRoom((new QuitChatRoomCommand(member, req.getChatId())));
+        return ApiUtils.successCreateWithEmptyResponse();
+    }
+
+    @SneakyThrows
+    @PostMapping("/room/ban")
+    ApiResponse<?> banChatRoom(@RequestBody ChatRequest req,
+                               @RequestHeader("memberId") UUID memberId) throws Exception {
+        Member.MemberId host = new MemberId(memberId);
+        Member.MemberId member = new MemberId(req.getMemberId());
+
+        quitChatRoomUseCase.transactionalBanChatRoom((new BanChatRoomCommand(host, member, req.getChatId())));
         return ApiUtils.successCreateWithEmptyResponse();
     }
 
