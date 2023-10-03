@@ -9,5 +9,7 @@ import java.util.UUID;
 public interface CreateChatRoomUseCase {
     ChatRoom createRoom(CreateChatRoomCommand command) throws Exception;
 
-    ChatRoom transactionalCreateRoom(ChatRequest req, UUID hostId) throws Exception;
+    ChatRoom transactionalCreateDirectRoom(ChatRequest req, UUID hostId) throws Exception;
+    ChatRoom transactionalCreateAccompanyRoom(ChatRequest req, UUID hostId) throws Exception;
+
 }
