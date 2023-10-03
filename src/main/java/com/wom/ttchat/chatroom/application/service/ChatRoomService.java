@@ -15,6 +15,7 @@ import com.wom.ttchat.chatroom.application.port.out.FindChatRoomPort;
 import com.wom.ttchat.chatroom.application.port.out.SaveChatRoomPort;
 import com.wom.ttchat.chatroom.domain.ChatRoom;
 import com.wom.ttchat.chatroom.domain.ChatRoomInfo;
+import com.wom.ttchat.chatroom.domain.ChatStat;
 import com.wom.ttchat.common.CommonCode;
 import com.wom.ttchat.common.Utils.CommonUtils;
 import com.wom.ttchat.common.dto.PageRequest;
@@ -187,8 +188,6 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
             if(CommonUtils.isEmpty(room_name))
                 room_name = accompany.getPostTitle();
         }
-
-        //TODO:동행글 null 아닌 경우 생성된 채팅방이 없는지 확인하는 로직 필요
         if (command.getAccompany_post_id() != null
             && findChatRoomPort.findByAccompanyPostId(command.getAccompany_post_id()) != null) {
             throw new IllegalStateException("동행글 당 하나의 채팅방만 생성이 가능합니다.");
@@ -206,10 +205,22 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
 
     @Override
     @Transactional
-    public ChatRoom transactionalCreateRoom(ChatRequest req, UUID hostId) throws Exception{
+    public ChatRoom transactionalCreateAccompanyRoom(ChatRequest req, UUID hostId) throws Exception {
+        ChatRoom chatRoom = createRoom(new CreateChatRoomCommand(
+                new MemberId(hostId), req.getName(), ChatStat.GROUP.getStat(), req.getAccompanyPostId()
+        ));
+        enterChatRoom(new EnterChatRoomCommand(
+                new MemberId(hostId), chatRoom.getChatRoomUUID()
+        ));
+        return chatRoom;
+    }
+
+    @Override
+    @Transactional
+    public ChatRoom transactionalCreateDirectRoom(ChatRequest req, UUID hostId) throws Exception{
 
         ChatRoom chatRoom = createRoom(new CreateChatRoomCommand(
-                new MemberId(hostId), req.getName(), false, req.getAccompanyPostId()
+                new MemberId(hostId), req.getName(), ChatStat.DIRECT.getStat(), req.getAccompanyPostId()
         ));
 
         if(req.getAccompanyPostId() == null && existDirectRoomByHostAndGuestId(hostId, req.getMemberId())){
