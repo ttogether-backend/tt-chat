@@ -2,12 +2,9 @@ package com.wom.ttchat.chatroom.adapter.in.web;
 
 
 import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
-import com.wom.ttchat.chatroom.adapter.out.entity.ChatRoomJpaEntity;
 import com.wom.ttchat.chatroom.application.port.in.Command.BanChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.Command.CreateChatRoomCommand;
 import com.wom.ttchat.chatroom.application.port.in.Command.EnterChatRoomCommand;
 import com.wom.ttchat.chatroom.application.port.in.Command.QuitChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.CreateChatCommand;
 import com.wom.ttchat.chatroom.application.port.in.CreateChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.port.in.EnterChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.port.in.LoadChatRoomUseCase;
@@ -20,15 +17,10 @@ import com.wom.ttchat.common.ApiUtils;
 import com.wom.ttchat.common.dto.PageRequest;
 import com.wom.ttchat.member.domain.Member;
 import com.wom.ttchat.member.domain.Member.MemberId;
-import com.wom.ttchat.message.adapter.in.request.MessageRequest;
 import com.wom.ttchat.message.application.WSMessageService;
-import com.wom.ttchat.message.domain.MessageType;
-import com.wom.ttchat.message.domain.SystemMessage;
 import com.wom.ttchat.participant.application.service.RegisterParticipantService;
 import com.wom.ttchat.participant.domain.Participant;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +58,7 @@ public class ChatRoomController {
         return ApiUtils.successCreateWithDataResponse(chatRoom);
     }
 
-    @SneakyThrows
+
     @PostMapping("/room/enter")
     ApiResponse<?> enterChatRoom(@RequestBody ChatRequest req,
                                  @RequestHeader ("memberId") UUID memberId) throws Exception {
@@ -75,7 +67,7 @@ public class ChatRoomController {
         return ApiUtils.successCreateWithEmptyResponse();
     }
 
-    @SneakyThrows
+
     @PostMapping("/room/quit")
     ApiResponse<?> quitChatRoom(@RequestBody ChatRequest req,
                                 @RequestHeader ("memberId") UUID memberId) throws Exception {
@@ -84,16 +76,27 @@ public class ChatRoomController {
         return ApiUtils.successCreateWithEmptyResponse();
     }
 
-    @SneakyThrows
+
     @PostMapping("/room/ban")
-    ApiResponse<?> banChatRoom(@RequestBody ChatRequest req,
+    ApiResponse<?> banUserInChatRoom(@RequestBody ChatRequest req,
                                @RequestHeader("memberId") UUID memberId) throws Exception {
         Member.MemberId host = new MemberId(memberId);
         Member.MemberId member = new MemberId(req.getMemberId());
 
-        quitChatRoomUseCase.transactionalBanChatRoom((new BanChatRoomCommand(host, member, req.getChatId())));
+        quitChatRoomUseCase.transactionalBanUser((new BanChatRoomCommand(host, member, req.getChatId())));
         return ApiUtils.successCreateWithEmptyResponse();
     }
+
+    @PostMapping("/room/ban/accept")
+    ApiResponse<?> banAccept(@RequestBody ChatRequest req,
+                               @RequestHeader("memberId") UUID memberId) throws Exception {
+        Member.MemberId member = new MemberId(memberId);
+
+        quitChatRoomUseCase.banAccept((new BanChatRoomCommand(null, member, req.getChatId())));
+        return ApiUtils.successCreateWithEmptyResponse();
+    }
+
+
 
     @GetMapping("/chat-room")
     ApiResponse<?> findChatRoomList(@RequestHeader("memberId") UUID memberId,

@@ -7,6 +7,7 @@ import com.wom.ttchat.participant.domain.Participant;
 public interface QuitChatRoomUseCase {
     Participant quitChatRoom(QuitChatRoomCommand command) throws Exception;
     Participant transactionalQuiChatRoom(QuitChatRoomCommand command) throws Exception;
-    Participant banChatRoom(BanChatRoomCommand command) throws Exception;
-    void transactionalBanChatRoom(BanChatRoomCommand command) throws Exception;
+    Participant banUserInChatRoom(BanChatRoomCommand command) throws Exception;
+    void transactionalBanUser(BanChatRoomCommand command) throws Exception;
+    void banAccept(BanChatRoomCommand command) throws Exception;
 }
