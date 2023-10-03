@@ -50,7 +50,7 @@ public class ChatRoomController {
     @PostMapping("/create/direct")
     ApiResponse<?> createDirectChat(@RequestBody ChatRequest req,
                                     @RequestHeader("memberId") UUID hostId) throws Exception{
-        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateRoom(req, hostId);
+        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateDirectRoom(req, hostId);
 
         return ApiUtils.successCreateWithDataResponse(chatRoom);
     }
@@ -58,12 +58,10 @@ public class ChatRoomController {
     @PostMapping("/create/accompany")
     ApiResponse<?> createAccompanyChat(@RequestBody ChatRequest req,
                                     @RequestHeader("memberId") UUID hostId) throws Exception {
-        ChatRoom chatRoom = createChatRoomUseCase.createRoom(new CreateChatRoomCommand(
-                new MemberId(hostId), req.getName(), true, req.getAccompanyPostId()
-        ));
-        enterChatRoomUseCase.enterChatRoom(new EnterChatRoomCommand(
-                new MemberId(hostId), chatRoom.getChatRoomUUID()
-        ));
+        if (req.getAccompanyPostId() == null) {
+            throw new IllegalStateException("동행글 아이디가 필요합니다.");
+        }
+        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateAccompanyRoom(req, hostId);
         return ApiUtils.successCreateWithDataResponse(chatRoom);
     }
 
