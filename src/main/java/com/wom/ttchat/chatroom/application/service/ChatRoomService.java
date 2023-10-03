@@ -179,7 +179,7 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     }
 
     @Override
-    public Participant banChatRoom(BanChatRoomCommand command) throws Exception {
+    public Participant banUserInChatRoom(BanChatRoomCommand command) throws Exception {
         Member member = loadMemberPort.loadMember(command.getMemberId());
         ChatRoom chatRoom = findChatRoomPort.findByUid(command.getRoomId());
         if (command.getHostId() == command.getMemberId()) {
@@ -202,8 +202,8 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     }
 
     @Override
-    public void transactionalBanChatRoom(BanChatRoomCommand command) throws Exception {
-        Participant participant = banChatRoom(command);
+    public void transactionalBanUser(BanChatRoomCommand command) throws Exception {
+        Participant participant = banUserInChatRoom(command);
         wsMessageService.saveMessage(MessageRequest.builder()
                 .roomId(command.getRoomId().toString())
                 .content(participant.getMember().getNickname() + SystemMessage.BAN.getMsg())
@@ -211,6 +211,20 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 .nickname(participant.getMember().getNickname())
                 .senderId(command.getMemberId().toString())
                 .build());
+    }
+
+    @Override
+    public void banAccept(BanChatRoomCommand command) throws Exception {
+        Member member = loadMemberPort.loadMember(command.getMemberId());
+        Participant participant = findParticipantPort.findParticipantByRoomIdAndMemberId(
+                findChatRoomPort.findByUid(command.getRoomId()),
+                member.getId());
+        if (!participant.isBanned()) {
+            throw new IllegalStateException("강퇴된 유저가 아닙니다.");
+        }
+        participant.setStatus(ParticipantStatus.BANNED);
+        participant.setDeletedAt(LocalDateTime.now());
+        updateParticipantPort.updateParticipantStatusAndDeleteAt(participant);
     }
 
 
