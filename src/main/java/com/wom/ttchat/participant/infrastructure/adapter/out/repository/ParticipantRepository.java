@@ -37,5 +37,5 @@ public interface ParticipantRepository extends JpaRepository<ParticipantJpaEntit
 
     Optional<ParticipantJpaEntity> findByMemberIdAndRoomId(UUID memberId, Long roomId);
 
-    Optional<ParticipantJpaEntity> findByRoomIdAndMemberIdAndStatusEquals(Long roomId, UUID memberId, String status);
+    Optional<ParticipantJpaEntity> findByRoomIdAndMemberIdAndStatusInAndDeleteAtIsNull(Long roomId, UUID memberId, List<String> statusList);
 }

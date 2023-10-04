@@ -61,7 +61,7 @@ public class WSMessageService implements WSMessageUseCase {
                 readAt = LocalDateTime.now();
         }
 
-        List<Message> messageList = findMessagePort.findMessageList(roomId, readAt.plusHours(9));
+        List<Message> messageList = findMessagePort.findUnReadMessageList(roomId, readAt.plusHours(9));
         if (CommonUtils.isEmpty(messageList))
             messageList = null;
 
