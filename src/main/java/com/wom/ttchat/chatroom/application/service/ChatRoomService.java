@@ -130,11 +130,13 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
             ChatRoom chatRoom = findChatRoomPort.findByUid(info.getRoomUid());
 
             Participant participantInfo = findParticipantPort.findParticipantByRoomIdAndMemberId(chatRoom, memberId);
+            System.out.println("::status::"+participantInfo.getStatus());
 
             if (participantInfo==null)
                 throw new IllegalStateException(CommonCode.UNAUTHORIZED_ACCESS_CHATROOM.getMessage());
 
-            //마지막으로 읽은 메세지 정보 추가
+            List<Message> messageList = new ArrayList<>();
+
             LocalDateTime readAt = participantInfo.getReadAt();
             //참여자테이블에 읽은 시간 데이터가 없을 경우 참여한 시간 이후 메세지 조회
             if(CommonUtils.isEmpty(readAt)) {
@@ -145,8 +147,19 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                     readAt = LocalDateTime.now();
             }
 
-            List<Message> messageList =
-                findMessagePort.findUnReadMessage(info.getRoomUid(), readAt.plusHours(9));
+            //강퇴당했을 경우 readAt<message_createAt<deleteAt
+            if (participantInfo.getStatus().toString().equals(ParticipantStatus.BANNED.name())) {
+                LocalDateTime banAt = participantInfo.getUpdatedAt();
+
+                messageList =
+                    findMessagePort.findBanBeforeUnReadMessage(info.getRoomUid(),
+                        readAt.plusHours(9), banAt.plusHours(9));
+            } else {
+                //마지막으로 읽은 메세지 정보 추가
+                messageList =
+                    findMessagePort.findUnReadMessage(info.getRoomUid(), readAt.plusHours(9));
+            }
+
             if(messageList.size()==0)
                 info.updateMessage(null, null, 0);
             else {

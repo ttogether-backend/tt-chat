@@ -3,7 +3,6 @@ package com.wom.ttchat.chatroom.adapter.out.persistence.repository;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.wom.ttchat.chatroom.adapter.out.entity.QChatRoomJpaEntity;
 import com.wom.ttchat.chatroom.domain.ChatRoomInfo;
 import com.wom.ttchat.common.dto.PageRequest;
 import com.wom.ttchat.member.domain.Member.MemberId;
@@ -11,7 +10,6 @@ import com.wom.ttchat.participant.domain.ParticipantStatus;
 import java.util.List;
 import java.util.UUID;
 
-import com.wom.ttchat.participant.infrastructure.adapter.out.entity.QParticipantJpaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -28,6 +26,7 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom{
 	@Override
 	public List<ChatRoomInfo> findChatRoomListByMemberId(MemberId memberId,
 		PageRequest pageRequest) {
+
 		JPAQuery<ChatRoomInfo> query = jpaQueryFactory
 			.select(Projections.constructor(
 				ChatRoomInfo.class,
@@ -40,7 +39,9 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom{
 			.leftJoin(accompanyJpaEntity)
 			.on(participantJpaEntity.room.accompanyPostId.eq(accompanyJpaEntity.accompanyPostId))
 			.where(participantJpaEntity.member.id.eq(memberId.getValue()),
-				participantJpaEntity.status.eq(ParticipantStatus.JOINED.name()))
+				participantJpaEntity.status.eq(ParticipantStatus.JOINED.name())
+					.or(participantJpaEntity.status.eq(ParticipantStatus.BANNED.name())
+						.and(participantJpaEntity.deleteAt.isNull())))
 			.orderBy(participantJpaEntity.room.createdAt.asc());
 
 

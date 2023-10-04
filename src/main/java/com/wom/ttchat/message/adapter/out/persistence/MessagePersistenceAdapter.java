@@ -42,7 +42,7 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
     }
 
     @Override
-    public List<Message> findMessageList(UUID roomUid, LocalDateTime readAt) {
+    public List<Message> findUnReadMessageList(UUID roomUid, LocalDateTime readAt) {
         List<MessageJpaEntity> jpaEntityList =
             messageJpaRepository.findAllByRoomUIdAndCreateAtAfterOrderByCreateAt(roomUid.toString(), readAt);
 
@@ -52,6 +52,38 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
         }
         return messageList;
 
+    }
+
+    @Override
+    public List<Message> findBanBeforeUnReadMessage(UUID roomUid, LocalDateTime readAt,
+        LocalDateTime banAt) {
+        List< MessageType> typeList = new ArrayList<>();
+        typeList.add(MessageType.MSG);
+        typeList.add(MessageType.MAP);
+
+        List<MessageJpaEntity> jpaEntityList =
+            messageJpaRepository.findAllByRoomUIdAndCreateAtBetweenAndTypeInOrderByCreateAtDesc(
+                roomUid.toString(), readAt, banAt, typeList);
+
+        List<Message> messageList = new ArrayList<>();
+        for (MessageJpaEntity jpaEntity : jpaEntityList) {
+            messageList.add(messageMapper.mapToDomainEntity(jpaEntity));
+        }
+
+        return messageList;
+    }
+
+    @Override
+    public List<Message> findBanBeforeUnReadMessageList(UUID roomUid, LocalDateTime readAt,
+        LocalDateTime banAt) {
+        List<MessageJpaEntity> jpaEntityList =
+            messageJpaRepository.findAllByAndRoomUIdAndCreateAtBetweenOrderByCreateAt(roomUid.toString(), readAt, banAt);
+
+        List<Message> messageList = new ArrayList<>();
+        for (MessageJpaEntity jpaEntity : jpaEntityList) {
+            messageList.add(messageMapper.mapToDomainEntity(jpaEntity));
+        }
+        return messageList;
     }
 
 
