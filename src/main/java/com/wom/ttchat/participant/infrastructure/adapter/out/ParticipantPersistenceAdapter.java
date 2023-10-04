@@ -120,9 +120,13 @@ public class ParticipantPersistenceAdapter implements UpdateParticipantPort, Fin
 
     @Override
     public Participant findJoinParticipant(ChatRoom chatRoom, MemberId memberId) {
+        List<String> statusList = new ArrayList<>();
+        statusList.add(ParticipantStatus.JOINED.name());
+        statusList.add(ParticipantStatus.BANNED.name());
+
         ParticipantJpaEntity jpaEntity
-            = participantRepository.findByRoomIdAndMemberIdAndStatusEquals(
-                chatRoom.getChatRoomId(), memberId.getValue(), ParticipantStatus.JOINED.name()
+            = participantRepository.findByRoomIdAndMemberIdAndStatusInAndDeleteAtIsNull(
+                chatRoom.getChatRoomId(), memberId.getValue(), statusList
         ).orElseThrow( () -> new EntityNotFoundException(CommonCode.UNAUTHORIZED_ACCESS_CHATROOM.getMessage()));
 
         return participantMapper.mapToDomainEntity(
