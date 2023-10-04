@@ -36,4 +36,12 @@ public final class ApiUtils {
                 .build();
     }
 
+    public static <T> ApiResponse<T> successWithDataResponse(T t) {
+        return ApiResponse.<T>builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .data(t)
+                .build();
+    }
+
 }
