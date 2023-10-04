@@ -12,7 +12,9 @@ import com.wom.ttchat.message.application.port.out.FindMessagePort;
 import com.wom.ttchat.message.domain.Message;
 import com.wom.ttchat.participant.application.port.out.FindParticipantPort;
 import com.wom.ttchat.participant.domain.Participant;
+import com.wom.ttchat.participant.domain.ParticipantStatus;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
@@ -50,7 +52,15 @@ public class MessageService implements MessageUseCase {
                 readAt = LocalDateTime.now();
         }
 
-        List<Message> messageList = findMessagePort.findMessageList(roomId, readAt.plusHours(9));
+        List<Message> messageList = new ArrayList<>();
+        if (participant.getStatus().toString().equals(ParticipantStatus.BANNED.name())) {
+            LocalDateTime banAt = participant.getUpdatedAt();
+            messageList = findMessagePort.findBanBeforeUnReadMessageList(roomId, readAt.plusHours(9), banAt.plusHours(9));
+        } else {
+            messageList = findMessagePort.findUnReadMessageList(roomId, readAt.plusHours(9));
+        }
+
+
         if (CommonUtils.isEmpty(messageList))
             messageList = null;
 
