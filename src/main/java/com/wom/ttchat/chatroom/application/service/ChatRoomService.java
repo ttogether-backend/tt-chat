@@ -1,5 +1,7 @@
 package com.wom.ttchat.chatroom.application.service;
 
+import com.wom.ttchat.accompanyMember.application.port.in.FindAccompanyMemberListQuery;
+import com.wom.ttchat.accompanyMember.application.port.out.FindAccompanyMemberListPort;
 import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
 import com.wom.ttchat.accompany.application.port.out.LoadAccompanyPort;
 import com.wom.ttchat.accompany.domain.Accompany;
@@ -55,6 +57,7 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     private final SaveChatRoomPort saveChatRoomPort;
     private final LoadAccompanyPort loadAccompanyPort;
     private final WSMessageService wsMessageService;
+    private final FindAccompanyMemberListQuery findAccompanyMemberListQuery;
 
     @Override
     public Participant enterChatRoom(EnterChatRoomCommand command) throws Exception{
@@ -82,7 +85,13 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     }
 
     @Override
+    @Transactional
     public Participant transactionalEnterChatRoom(EnterChatRoomCommand command) throws Exception {
+        // 챗DB에 accompany member 테이블이 없는 관계로 해당 기능 보류
+        // 테이블 못만드는 이유
+        // 테이블을 생성하더라도 MSA 설계원칙에 따라 동행 서비스에서 동행 멤버 생성 API 발송을 해주지 못함
+        // 또한 MSA 설계원칙에 따라 동행DB를 조회할 수 없음.
+        // boolean isMember =  isAccompanyMember(command);
         Participant participant = enterChatRoom(command);
         wsMessageService.saveMessage(MessageRequest.builder()
                 .roomId(command.getRoomId().toString())
@@ -92,6 +101,20 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 .senderId(command.getMemberId().toString())
                 .build());
         return participant;
+    }
+
+    @Override
+    public boolean isAccompanyMember(EnterChatRoomCommand command) throws Exception {
+        ChatRoom chatRoom = findChatRoomPort.findByUid(command.getRoomId());
+        if(chatRoom == null){
+            throw new IllegalArgumentException(CommonCode.NOT_FOUND_CHATROOM.getMessage());
+        }
+        boolean isAccompanyMember = findAccompanyMemberListQuery.isAccompanyMember(chatRoom.getChatRoomId(),command.getMemberId().getValue());
+
+        if(!isAccompanyMember){
+            throw new IllegalStateException(CommonCode.UNAUTHORIZED_ACCESS_CHATROOM.getMessage());
+        }
+        return isAccompanyMember;
     }
 
     @Override
@@ -226,7 +249,6 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
         participant.setDeletedAt(LocalDateTime.now());
         updateParticipantPort.updateParticipantStatusAndDeleteAt(participant);
     }
-
 
     @Override
     public ChatRoom createRoom(CreateChatRoomCommand command) throws Exception {
