@@ -2,17 +2,14 @@ package com.wom.ttchat.chatroom.adapter.in.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wom.ttchat.accompany.domain.Accompany;
-import com.wom.ttchat.chatroom.application.port.in.Command.QuitChatRoomCommand;
+import com.wom.ttchat.chatroom.adapter.in.messaging.event.ExitAccompanyEvent;
+import com.wom.ttchat.chatroom.adapter.in.messaging.event.KickAccompanyEvent;
 import com.wom.ttchat.chatroom.application.service.ChatRoomService;
-import com.wom.ttchat.member.domain.Member;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -27,12 +24,26 @@ public class ChatEventConsumer {
     @Transactional
     public void listenExitAccompany(String message) throws JsonProcessingException {
         try {
-            AccompanyEvent accompanyEvent = objectMapper.readValue(message, AccompanyEvent.class);
+            ExitAccompanyEvent exitAccompanyEvent = objectMapper.readValue(message, ExitAccompanyEvent.class);
             log.info("[Kafka-Event] topic : exit accompany, received message : {}", message);
-            chatRoomService.transactionalQuiChatRoom(accompanyEvent);
+            chatRoomService.transactionalExitChatRoom(exitAccompanyEvent);
             log.info("[Kafka-Event] topic : exit accompany, consumed successfully");
         } catch (Exception e) {
             log.error("[Kafka-Event] topic : exit accompany, received message : {}, error message : {}", message, e.getMessage());
+            // needs roll back event
+        }
+    }
+
+    @KafkaListener(topics = "${kafka.topic.sub.together.kick-accompany}")
+    @Transactional
+    public void listenKickAccompany(String message) throws JsonProcessingException {
+        try {
+            KickAccompanyEvent kickAccompanyEvent = objectMapper.readValue(message, KickAccompanyEvent.class);
+            log.info("[Kafka-Event] topic : kick accompany, received message : {}", message);
+            chatRoomService.transactionalBanUser(kickAccompanyEvent);
+            log.info("[Kafka-Event] topic : kick accompany, consumed successfully");
+        } catch (Exception e) {
+            log.error("[Kafka-Event] topic : kick accompany, received message : {}, error message : {}", message, e.getMessage());
             // needs roll back event
         }
     }

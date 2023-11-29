@@ -1,4 +1,4 @@
-package com.wom.ttchat.chatroom.adapter.in.messaging;
+package com.wom.ttchat.chatroom.adapter.in.messaging.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccompanyEvent {
+public class KickAccompanyEvent {
     private UUID memberId;
     private Long accompanyId;
     private Long accompanyMemberId;
