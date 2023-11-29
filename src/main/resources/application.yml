@@ -1,24 +1,16 @@
 server:
   port: 9004
 spring:
-  datasource:
-    url: jdbc:postgresql://together-travel.c8rxjlbma4cz.ap-northeast-2.rds.amazonaws.com:5432/chat
-#    url: jdbc:postgresql://localhost:5432/shop
-    username: rachel
-    password: smroqlgnwkd
-    driver-class-name: org.postgresql.Driver
   application:
     name: tt-chat
-  data:
-    mongodb:
-      authentication-database: admin
-      username: root
-      password: root
-      host: localhost
-      port: 27017
-      database: chat
+  profiles:
+    active: dev
   main:
     allow-bean-definition-overriding: true
+#  jpa:
+#    hibernate:
+#      ddl-auto: create
+
 eureka:
   instance:
     instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
@@ -26,7 +18,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8700/eureka
+      defaultZone: ${DISCOVERY_SERVICE_URL}
 logging:
   level:
     org:
