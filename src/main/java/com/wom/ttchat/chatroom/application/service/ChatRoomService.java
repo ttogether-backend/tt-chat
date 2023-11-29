@@ -1,7 +1,7 @@
 package com.wom.ttchat.chatroom.application.service;
 
 import com.wom.ttchat.accompanyMember.application.port.in.FindAccompanyMemberListQuery;
-import com.wom.ttchat.accompanyMember.application.port.out.FindAccompanyMemberListPort;
+import com.wom.ttchat.chatroom.adapter.in.messaging.AccompanyEvent;
 import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
 import com.wom.ttchat.accompany.application.port.out.LoadAccompanyPort;
 import com.wom.ttchat.accompany.domain.Accompany;
@@ -202,7 +202,9 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
 
     @Override
     @Transactional
-    public Participant transactionalQuiChatRoom(QuitChatRoomCommand command) throws Exception {
+    public Participant transactionalQuiChatRoom(AccompanyEvent event) throws Exception {
+        ChatRoom chatRoom = findChatRoomPort.findByAccompanyPostId(event.getAccompanyId());
+        QuitChatRoomCommand command = new QuitChatRoomCommand(new MemberId(event.getMemberId()), event.getAccompanyId(), chatRoom.getChatRoomUUID());
         Participant participant = quitChatRoom(command);
         wsMessageService.saveMessage(MessageRequest.builder()
                 .roomId(command.getRoomId().toString())

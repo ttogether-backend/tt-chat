@@ -68,13 +68,13 @@ public class ChatRoomController {
     }
 
 
-    @PostMapping("/room/quit")
-    ApiResponse<?> quitChatRoom(@RequestBody ChatRequest req,
-                                @RequestHeader ("memberId") UUID memberId) throws Exception {
-        Member.MemberId member = new Member.MemberId(memberId);
-        Participant participant = quitChatRoomUseCase.transactionalQuiChatRoom((new QuitChatRoomCommand(member, req.getChatId())));
-        return ApiUtils.successCreateWithEmptyResponse();
-    }
+//    @PostMapping("/room/quit")
+//    ApiResponse<?> quitChatRoom(@RequestBody ChatRequest req,
+//                                @RequestHeader ("memberId") UUID memberId) throws Exception {
+//        Member.MemberId member = new Member.MemberId(memberId);
+//        Participant participant = quitChatRoomUseCase.transactionalQuiChatRoom((new QuitChatRoomCommand(member, req.getChatId())));
+//        return ApiUtils.successCreateWithEmptyResponse();
+//    }
 
 
     @PostMapping("/room/ban")

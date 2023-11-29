@@ -10,5 +10,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class QuitChatRoomCommand {
     private Member.MemberId memberId;
+    private Long accompanyId;
     private UUID roomId;
 }

@@ -41,7 +41,6 @@ public class ParticipantJpaEntity extends BaseTimeEntity {
     @Column(name = "id")
     private Long id;
     @Column
-    @ColumnDefault("get_random_uuid()")
     private UUID uid;
     @Column
     private String status;
