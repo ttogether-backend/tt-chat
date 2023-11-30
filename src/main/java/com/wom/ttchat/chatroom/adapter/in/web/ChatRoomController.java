@@ -20,6 +20,7 @@ import com.wom.ttchat.member.domain.Member.MemberId;
 import com.wom.ttchat.message.application.WSMessageService;
 import com.wom.ttchat.participant.application.service.RegisterParticipantService;
 import com.wom.ttchat.participant.domain.Participant;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
+@Tag(name = "채팅", description = "채팅방 목록 조회")
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/chat")
 public class ChatRoomController {
@@ -40,32 +42,32 @@ public class ChatRoomController {
     private final WSMessageService wsMessageService;
     private final LoadChatRoomUseCase loadChatRoomUseCase;
 
-    @PostMapping("/create/direct")
-    ApiResponse<?> createDirectChat(@RequestBody ChatRequest req,
-                                    @RequestHeader("memberId") UUID hostId) throws Exception{
-        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateDirectRoom(req, hostId);
-
-        return ApiUtils.successCreateWithDataResponse(chatRoom);
-    }
-
-    @PostMapping("/create/accompany")
-    ApiResponse<?> createAccompanyChat(@RequestBody ChatRequest req,
-                                    @RequestHeader("memberId") UUID hostId) throws Exception {
-        if (req.getAccompanyPostId() == null) {
-            throw new IllegalStateException("동행글 아이디가 필요합니다.");
-        }
-        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateAccompanyRoom(req, hostId);
-        return ApiUtils.successCreateWithDataResponse(chatRoom);
-    }
-
-
-    @PostMapping("/room/enter")
-    ApiResponse<?> enterChatRoom(@RequestBody ChatRequest req,
-                                 @RequestHeader ("memberId") UUID memberId) throws Exception {
-        Member.MemberId member = new Member.MemberId(memberId);
-        Participant participant = enterChatRoomUseCase.transactionalEnterChatRoom((new EnterChatRoomCommand(member, req.getChatId())));
-        return ApiUtils.successCreateWithEmptyResponse();
-    }
+//    @PostMapping("/create/direct")
+//    ApiResponse<?> createDirectChat(@RequestBody ChatRequest req,
+//                                    @RequestHeader("memberId") UUID hostId) throws Exception{
+//        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateDirectRoom(req, hostId);
+//
+//        return ApiUtils.successCreateWithDataResponse(chatRoom);
+//    }
+//
+//    @PostMapping("/create/accompany")
+//    ApiResponse<?> createAccompanyChat(@RequestBody ChatRequest req,
+//                                    @RequestHeader("memberId") UUID hostId) throws Exception {
+//        if (req.getAccompanyPostId() == null) {
+//            throw new IllegalStateException("동행글 아이디가 필요합니다.");
+//        }
+//        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateAccompanyRoom(req, hostId);
+//        return ApiUtils.successCreateWithDataResponse(chatRoom);
+//    }
+//
+//
+//    @PostMapping("/room/enter")
+//    ApiResponse<?> enterChatRoom(@RequestBody ChatRequest req,
+//                                 @RequestHeader ("memberId") UUID memberId) throws Exception {
+//        Member.MemberId member = new Member.MemberId(memberId);
+//        Participant participant = enterChatRoomUseCase.transactionalEnterChatRoom((new EnterChatRoomCommand(member, req.getChatId())));
+//        return ApiUtils.successCreateWithEmptyResponse();
+//    }
 
 
 //    @PostMapping("/room/quit")
