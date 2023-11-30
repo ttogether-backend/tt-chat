@@ -4,12 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wom.ttchat.chatroom.adapter.in.messaging.event.ExitAccompanyEvent;
 import com.wom.ttchat.chatroom.adapter.in.messaging.event.KickAccompanyEvent;
+import com.wom.ttchat.chatroom.adapter.out.messaging.ChatRollBackProducer;
 import com.wom.ttchat.chatroom.application.service.ChatRoomService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -17,10 +17,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ChatEventConsumer {
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final KafkaTemplate<String, String> kafkaTemplate;
     private final ChatRoomService chatRoomService;
+    private final ChatRollBackProducer rollBackProducer;
 
-    @KafkaListener(topics = "${kafka.topic.sub.together.exit-accompany}")
+    @KafkaListener(topics = "${kafka.topic.sub.together.exit-accompany}", errorHandler = "kafkaErrorHandler")
     @Transactional
     public void listenExitAccompany(String message) throws JsonProcessingException {
         try {
@@ -31,11 +31,11 @@ public class ChatEventConsumer {
         } catch (Exception e) {
             log.error("[Kafka-Event] topic : exit accompany, received message : {}, error message : {}", message, e.getMessage());
             // needs roll back event
+//            rollBackProducer.rollBackExitChat(exitAccompanyEvent);
         }
     }
 
     @KafkaListener(topics = "${kafka.topic.sub.together.kick-accompany}")
-    @Transactional
     public void listenKickAccompany(String message) throws JsonProcessingException {
         try {
             KickAccompanyEvent kickAccompanyEvent = objectMapper.readValue(message, KickAccompanyEvent.class);

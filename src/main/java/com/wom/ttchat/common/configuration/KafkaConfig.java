@@ -1,5 +1,6 @@
 package com.wom.ttchat.common.configuration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -14,7 +15,9 @@ import org.springframework.kafka.listener.KafkaListenerErrorHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
+@Slf4j
 @EnableKafka
 @Configuration
 public class KafkaConfig {
@@ -32,6 +35,8 @@ public class KafkaConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, appName);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString());
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         return new DefaultKafkaConsumerFactory<>(props);
     }
@@ -57,15 +62,10 @@ public class KafkaConfig {
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-//        configProps.put(ProducerConfig.ACKS_CONFIG, "all");
-        configProps.put(ProducerConfig.ACKS_CONFIG, 0);
+        configProps.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, UUID.randomUUID().toString());
+        configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
+        configProps.put(ProducerConfig.ACKS_CONFIG, "all");
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
-    @Bean
-    public KafkaListenerErrorHandler kafkaErrorHandler() {
-        return (message, exception) -> {
-            return message;
-        };
-    }
 }

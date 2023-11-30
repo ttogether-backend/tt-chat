@@ -87,14 +87,14 @@ public class ChatRoomController {
 //        return ApiUtils.successCreateWithEmptyResponse();
 //    }
 
-    @PostMapping("/room/ban/accept")
-    ApiResponse<?> banAccept(@RequestBody ChatRequest req,
-                               @RequestHeader("memberId") UUID memberId) throws Exception {
-        Member.MemberId member = new MemberId(memberId);
-
-        quitChatRoomUseCase.banAccept((new BanChatRoomCommand(null, member, req.getChatId())));
-        return ApiUtils.successCreateWithEmptyResponse();
-    }
+//    @PostMapping("/room/ban/accept")
+//    ApiResponse<?> banAccept(@RequestBody ChatRequest req,
+//                               @RequestHeader("memberId") UUID memberId) throws Exception {
+//        Member.MemberId member = new MemberId(memberId);
+//
+//        quitChatRoomUseCase.banAccept((new BanChatRoomCommand(null, member, req.getChatId())));
+//        return ApiUtils.successCreateWithEmptyResponse();
+//    }
 
 
 
