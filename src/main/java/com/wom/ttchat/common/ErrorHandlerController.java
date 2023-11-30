@@ -21,15 +21,15 @@ public class ErrorHandlerController {
         .build();
   }
 
-//  @ExceptionHandler(EntityNotFoundException.class)
-//  @ResponseStatus(HttpStatus.NOT_FOUND)
-//  public ApiResponse<String> handleNotFoundException(Exception e) {
-//    return ApiResponse.<String>builder()
-//        .code(HttpStatus.NOT_FOUND.value())
-//        .success(false)
-//        .error(new ApiError(HttpStatus.NOT_FOUND.name(), e.getMessage()))
-//        .build();
-//  }
+  @ExceptionHandler(EntityNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ApiResponse<String> handleNotFoundException(Exception e) {
+    return ApiResponse.<String>builder()
+        .code(HttpStatus.NOT_FOUND.value())
+        .success(false)
+        .error(new ApiError(HttpStatus.NOT_FOUND.name(), e.getMessage()))
+        .build();
+  }
 
   @ExceptionHandler
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

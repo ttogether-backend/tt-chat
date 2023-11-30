@@ -31,7 +31,7 @@ public class KafkaErrorHandler implements KafkaListenerErrorHandler {
         log.error("[KafkaErrorHandler] kafka message = [" + message.getPayload() +
                 "], error message = [" + exception.getMessage() + "]");
 //        ConsumerRecord<String, String> record = (ConsumerRecord<String, String>) message.getPayload();
-        chatRollBackProducer.rollBackExitChat(message.getPayload().toString());
+//        chatRollBackProducer.rollBackExitChat(message.getPayload().toString());
 //        Map<TopicPartition, OffsetAndMetadata> offsets = new HashMap<>();
 //        offsets.put(
 //                new TopicPartition(record.topic(), record.partition()),

@@ -23,8 +23,6 @@ import java.util.UUID;
 public class KafkaConfig {
     @Value(value = "tt-chat")
     private String appName;
-
-
     @Value(value = "${kafka.bootstrapAddress}")
     private String bootstrapAddress;
 
