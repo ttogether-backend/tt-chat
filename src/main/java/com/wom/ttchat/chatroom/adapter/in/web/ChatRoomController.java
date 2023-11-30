@@ -68,33 +68,33 @@ public class ChatRoomController {
     }
 
 
-    @PostMapping("/room/quit")
-    ApiResponse<?> quitChatRoom(@RequestBody ChatRequest req,
-                                @RequestHeader ("memberId") UUID memberId) throws Exception {
-        Member.MemberId member = new Member.MemberId(memberId);
-        Participant participant = quitChatRoomUseCase.transactionalQuiChatRoom((new QuitChatRoomCommand(member, req.getChatId())));
-        return ApiUtils.successCreateWithEmptyResponse();
-    }
+//    @PostMapping("/room/quit")
+//    ApiResponse<?> quitChatRoom(@RequestBody ChatRequest req,
+//                                @RequestHeader ("memberId") UUID memberId) throws Exception {
+//        Member.MemberId member = new Member.MemberId(memberId);
+//        Participant participant = quitChatRoomUseCase.transactionalQuiChatRoom((new QuitChatRoomCommand(member, req.getChatId())));
+//        return ApiUtils.successCreateWithEmptyResponse();
+//    }
 
 
-    @PostMapping("/room/ban")
-    ApiResponse<?> banUserInChatRoom(@RequestBody ChatRequest req,
-                               @RequestHeader("memberId") UUID memberId) throws Exception {
-        Member.MemberId host = new MemberId(memberId);
-        Member.MemberId member = new MemberId(req.getMemberId());
+//    @PostMapping("/room/ban")
+//    ApiResponse<?> banUserInChatRoom(@RequestBody ChatRequest req,
+//                               @RequestHeader("memberId") UUID memberId) throws Exception {
+//        Member.MemberId host = new MemberId(memberId);
+//        Member.MemberId member = new MemberId(req.getMemberId());
+//
+//        quitChatRoomUseCase.transactionalBanUser((new BanChatRoomCommand(host, member, req.getChatId())));
+//        return ApiUtils.successCreateWithEmptyResponse();
+//    }
 
-        quitChatRoomUseCase.transactionalBanUser((new BanChatRoomCommand(host, member, req.getChatId())));
-        return ApiUtils.successCreateWithEmptyResponse();
-    }
-
-    @PostMapping("/room/ban/accept")
-    ApiResponse<?> banAccept(@RequestBody ChatRequest req,
-                               @RequestHeader("memberId") UUID memberId) throws Exception {
-        Member.MemberId member = new MemberId(memberId);
-
-        quitChatRoomUseCase.banAccept((new BanChatRoomCommand(null, member, req.getChatId())));
-        return ApiUtils.successCreateWithEmptyResponse();
-    }
+//    @PostMapping("/room/ban/accept")
+//    ApiResponse<?> banAccept(@RequestBody ChatRequest req,
+//                               @RequestHeader("memberId") UUID memberId) throws Exception {
+//        Member.MemberId member = new MemberId(memberId);
+//
+//        quitChatRoomUseCase.banAccept((new BanChatRoomCommand(null, member, req.getChatId())));
+//        return ApiUtils.successCreateWithEmptyResponse();
+//    }
 
 
 

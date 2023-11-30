@@ -1,7 +1,8 @@
 package com.wom.ttchat.chatroom.application.service;
 
 import com.wom.ttchat.accompanyMember.application.port.in.FindAccompanyMemberListQuery;
-import com.wom.ttchat.accompanyMember.application.port.out.FindAccompanyMemberListPort;
+import com.wom.ttchat.chatroom.adapter.in.messaging.event.ExitAccompanyEvent;
+import com.wom.ttchat.chatroom.adapter.in.messaging.event.KickAccompanyEvent;
 import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
 import com.wom.ttchat.accompany.application.port.out.LoadAccompanyPort;
 import com.wom.ttchat.accompany.domain.Accompany;
@@ -189,7 +190,7 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     public Participant quitChatRoom(QuitChatRoomCommand command) throws Exception{
         Member member = loadMemberPort.loadMember(command.getMemberId());
         Participant participant = findParticipantPort.findParticipantByRoomIdAndMemberId(
-                findChatRoomPort.findByUid(command.getRoomId()),
+                command.getChatRoom(),
                 member.getId());
         if (participant != null && participant.isJoined()) {
             participant.setStatus(ParticipantStatus.LEFT);
@@ -202,10 +203,13 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
 
     @Override
     @Transactional
-    public Participant transactionalQuiChatRoom(QuitChatRoomCommand command) throws Exception {
+    public Participant transactionalExitChatRoom(ExitAccompanyEvent event) throws Exception {
+        ChatRoom chatRoom = findChatRoomPort.findByAccompanyPostId(event.getAccompanyId());
+        QuitChatRoomCommand command = new QuitChatRoomCommand(new MemberId(event.getMemberId()),
+                event.getAccompanyId(), chatRoom);
         Participant participant = quitChatRoom(command);
         wsMessageService.saveMessage(MessageRequest.builder()
-                .roomId(command.getRoomId().toString())
+                .roomId(chatRoom.getChatRoomUUID().toString())
                 .content(participant.getMember().getNickname() + SystemMessage.QUIT.getMsg())
                 .messageType(MessageType.SYS)
                 .nickname(participant.getMember().getNickname())
@@ -217,16 +221,15 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     @Override
     public Participant banUserInChatRoom(BanChatRoomCommand command) throws Exception {
         Member member = loadMemberPort.loadMember(command.getMemberId());
-        ChatRoom chatRoom = findChatRoomPort.findByUid(command.getRoomId());
-        if (command.getHostId() == command.getMemberId()) {
-            throw new IllegalStateException("스스로 강퇴할 수 없습니다.");
-        } else if (!chatRoom.getHostMemberId().getId().equals(command.getHostId())) {
-            log.info("host : " + chatRoom.getHostMemberId().getId().toString()
-            + "member : " + command.getHostId().toString());
-            throw new IllegalStateException("호스트만 강퇴할 수 있습니다.");
-        }
+//        if (command.getChatroom().getHostMemberId().equals(command.getMemberId())) {
+//            throw new IllegalStateException("스스로 강퇴할 수 없습니다.");
+//        } else if (!chatRoom.getHostMemberId().getId().equals(command.getHostId())) {
+//            log.info("host : " + chatRoom.getHostMemberId().getId().toString()
+//            + "member : " + command.getHostId().toString());
+//            throw new IllegalStateException("호스트만 강퇴할 수 있습니다.");
+//        }
         Participant participant = findParticipantPort.findParticipantByRoomIdAndMemberId(
-                findChatRoomPort.findByUid(command.getRoomId()),
+                findChatRoomPort.findByUid(command.getChatroom().getChatRoomUUID()),
                 member.getId());
         if (participant != null && participant.isJoined()) {
             participant.setStatus(ParticipantStatus.BANNED);
@@ -238,10 +241,14 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     }
 
     @Override
-    public void transactionalBanUser(BanChatRoomCommand command) throws Exception {
+    public void transactionalBanUser(KickAccompanyEvent event) throws Exception {
+        ChatRoom chatRoom = findChatRoomPort.findByAccompanyPostId(event.getAccompanyId());
+        BanChatRoomCommand command = new BanChatRoomCommand(
+                new MemberId(event.getMemberId()),
+                chatRoom);
         Participant participant = banUserInChatRoom(command);
         wsMessageService.saveMessage(MessageRequest.builder()
-                .roomId(command.getRoomId().toString())
+                .roomId(chatRoom.getChatRoomUUID().toString())
                 .content(participant.getMember().getNickname() + SystemMessage.BAN.getMsg())
                 .messageType(MessageType.SYS)
                 .nickname(participant.getMember().getNickname())
@@ -249,18 +256,19 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 .build());
     }
 
+
     @Override
     public void banAccept(BanChatRoomCommand command) throws Exception {
-        Member member = loadMemberPort.loadMember(command.getMemberId());
-        Participant participant = findParticipantPort.findParticipantByRoomIdAndMemberId(
-                findChatRoomPort.findByUid(command.getRoomId()),
-                member.getId());
-        if (!participant.isBanned()) {
-            throw new IllegalStateException("강퇴된 유저가 아닙니다.");
-        }
-        participant.setStatus(ParticipantStatus.BANNED);
-        participant.setDeletedAt(LocalDateTime.now());
-        updateParticipantPort.updateParticipantStatusAndDeleteAt(participant);
+//        Member member = loadMemberPort.loadMember(command.getMemberId());
+//        Participant participant = findParticipantPort.findParticipantByRoomIdAndMemberId(
+//                findChatRoomPort.findByUid(command.getRoomId()),
+//                member.getId());
+//        if (!participant.isBanned()) {
+//            throw new IllegalStateException("강퇴된 유저가 아닙니다.");
+//        }
+//        participant.setStatus(ParticipantStatus.BANNED);
+//        participant.setDeletedAt(LocalDateTime.now());
+//        updateParticipantPort.updateParticipantStatusAndDeleteAt(participant);
     }
 
     @Override
