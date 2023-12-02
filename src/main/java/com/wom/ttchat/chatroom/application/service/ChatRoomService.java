@@ -2,6 +2,7 @@ package com.wom.ttchat.chatroom.application.service;
 
 import com.wom.ttchat.accompanyMember.application.port.in.FindAccompanyMemberListQuery;
 import com.wom.ttchat.chatroom.adapter.in.messaging.event.ExitAccompanyEvent;
+import com.wom.ttchat.chatroom.adapter.in.messaging.event.JoinAccompanyEvent;
 import com.wom.ttchat.chatroom.adapter.in.messaging.event.KickAccompanyEvent;
 import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
 import com.wom.ttchat.accompany.application.port.out.LoadAccompanyPort;
@@ -335,5 +336,10 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     @Override
     public boolean existDirectRoomByHostAndGuestId(UUID hostId, UUID guestId) throws Exception {
         return findChatRoomPort.isExistDirectRoomByHostAndGuestId(hostId, guestId);
+    }
+
+    public void joinChatRoom(JoinAccompanyEvent event) throws Exception {
+        ChatRoom chatRoom = findChatRoomPort.findByAccompanyPostId(event.getAccompanyId());
+        enterChatRoom(new EnterChatRoomCommand(new MemberId(event.getMemberId()), chatRoom.getChatRoomUUID()));
     }
 }
