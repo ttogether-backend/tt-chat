@@ -15,6 +15,7 @@ import com.wom.ttchat.participant.application.service.RegisterParticipantService
 import com.wom.ttchat.participant.application.service.UpdateParticipantService;
 import com.wom.ttchat.participant.domain.ParticipantStatus;
 import com.wom.ttchat.participant.infrastructure.adapter.out.entity.ParticipantJpaEntity;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
@@ -42,6 +43,7 @@ import java.util.UUID;
 
 @Slf4j
 //@WebAdapter
+@Tag(name = "메세지", description = "메세지 전송, 메세지 조회")
 @Controller
 @RequiredArgsConstructor
 public class WSMessageController {

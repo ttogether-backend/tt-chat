@@ -28,7 +28,6 @@ public class ParticipantController {
         UUID roomUId = UUID.fromString(roomId);
         Boolean isAuth = findParticipantUseCase.isParticipant(roomUId, memberId);
         return ApiUtils.createSuccessWithDataResponse(isAuth);
-
     }
 
 }
