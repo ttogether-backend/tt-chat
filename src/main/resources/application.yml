@@ -46,8 +46,8 @@ kafka:
       rollback:
         create-member: rollback-create-member
         update-member: rollback-update-member
-        open-accompany: rollback-open-accompany
-        join-accompany: rollback-join-accompany
+        open-accompany: together-rollbackOpenAccompany
+        join-accompany: together-rollbackJoinAccompany
         exit-accompany: rollback-exit-accompany
         kick-accompany: rollback-kick-accompany
 
@@ -55,8 +55,8 @@ kafka:
       together:
         create-member: create-member
         update-member: update-member
-        open-accompany: open-accompany
-        join-accompany: join-accompany
+        open-accompany: together-openAccompany
+        join-accompany: together-joinAccompany
         exit-accompany: exit-accompany
         kick-accompany: kick-accompany
       rollback:
