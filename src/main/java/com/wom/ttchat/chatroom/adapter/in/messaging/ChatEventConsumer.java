@@ -3,13 +3,24 @@ package com.wom.ttchat.chatroom.adapter.in.messaging;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wom.ttchat.chatroom.adapter.in.messaging.event.ExitAccompanyEvent;
+import com.wom.ttchat.chatroom.adapter.in.messaging.event.JoinAccompanyEvent;
 import com.wom.ttchat.chatroom.adapter.in.messaging.event.KickAccompanyEvent;
+import com.wom.ttchat.chatroom.adapter.in.messaging.event.OpenAccompanyEvent;
 import com.wom.ttchat.chatroom.adapter.out.messaging.ChatRollBackProducer;
+import com.wom.ttchat.chatroom.application.port.in.Command.CreateChatRoomCommand;
 import com.wom.ttchat.chatroom.application.service.ChatRoomService;
+import com.wom.ttchat.member.domain.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -48,4 +59,47 @@ public class ChatEventConsumer {
             rollBackProducer.rollBackKickAccompany(kickAccompanyEvent);
         }
     }
-}
+
+    @KafkaListener(topics = "${join-accompany}", errorHandler = "kafkaErrorHandler")
+//    @SendTo("${kafka.topic.pub.rollback.join-accompany}")
+    public void listenJoinAccompany(String message)  throws JsonProcessingException {
+        try{
+            log.info("[Kafka-Event] topic : join accompany, received message : {}", message);
+            JoinAccompanyEvent event = objectMapper.readValue(message, JoinAccompanyEvent.class);
+            chatRoomService.joinChatRoom(event);
+            log.info("[Kafka-Event] topic : join accompany, consumed successfully");
+        }catch (Exception e){
+            log.error("[Kafka-Event] topic : join accompany, received message : {}, error message : {}", message, e.getMessage());
+            //rollback
+        }
+    }
+
+    @KafkaListener(topics = {"${open-accompany}"}, errorHandler = "kafkaErrorHandler")
+    public void listenOpenAccompany(@Payload String message) throws JsonProcessingException {
+        try{
+            log.info("[Kafka-Event] topic : open accompany, received message : {}", message);
+
+            OpenAccompanyEvent openAccompanyEvent = objectMapper.readValue(message, OpenAccompanyEvent.class);
+
+            UUID hostId = openAccompanyEvent.getMemberId();
+            Long accompanyId = openAccompanyEvent.getAccompanyId();
+            // 방 생성
+            chatRoomService.createRoom(new CreateChatRoomCommand(
+                    new Member.MemberId(hostId),
+                    openAccompanyEvent.getAccompanyPostName(),
+                    true,
+                    accompanyId
+            ));
+
+            // 주최자의 채팅방 참여
+            JoinAccompanyEvent accompanyEvent = new JoinAccompanyEvent(hostId, accompanyId, null);
+            chatRoomService.joinChatRoom(accompanyEvent);
+
+            log.info("[Kafka-Event] topic : open accompany, consumed successfully");
+
+        }catch (Exception e){
+            log.error("[Kafka-Event] topic : open accompany, received message : {}, error message : {}", message, e.getMessage());
+            //rollback
+        }
+    }
+    }
