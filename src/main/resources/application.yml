@@ -59,6 +59,8 @@ kafka:
         join-accompany: together-joinAccompany
         exit-accompany: exit-accompany
         kick-accompany: kick-accompany
+      auth:
+        create-member: create-member
       rollback:
         exit-chat: rollback-exit-chat
         kick-chat: rollback-kick-chat
