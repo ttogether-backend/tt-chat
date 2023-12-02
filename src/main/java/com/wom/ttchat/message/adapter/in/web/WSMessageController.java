@@ -43,8 +43,8 @@ import java.util.UUID;
 
 @Slf4j
 //@WebAdapter
-@Controller
 @Tag(name = "메세지", description = "메세지 전송, 메세지 조회")
+@Controller
 @RequiredArgsConstructor
 public class WSMessageController {
 

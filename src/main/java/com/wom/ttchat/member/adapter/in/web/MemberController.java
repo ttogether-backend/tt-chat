@@ -13,6 +13,8 @@ import com.wom.ttchat.member.domain.AccountStatus;
 import com.wom.ttchat.member.domain.CertificationStatus;
 import com.wom.ttchat.member.domain.Member.MemberId;
 import java.util.UUID;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @WebAdapter
+@Tag(name = "회원", description = "회원 정보 수정, 회원 조회, 회원 프로필 조회")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/chat")

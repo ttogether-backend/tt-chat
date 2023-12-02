@@ -11,6 +11,7 @@ import com.wom.ttchat.common.ApiResponse;
 import com.wom.ttchat.common.ApiUtils;
 import com.wom.ttchat.common.annotation.WebAdapter;
 import com.wom.ttchat.member.domain.Member.MemberId;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;

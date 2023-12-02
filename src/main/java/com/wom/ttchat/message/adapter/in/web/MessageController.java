@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "메세지", description = "메세지 조회")
+@Tag(name = "메세지", description = "채팅방 내 메세지 조회")
 @RequestMapping("/api/v1/chat")
 public class MessageController {
     @Autowired

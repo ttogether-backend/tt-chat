@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@Tag(name = "채팅", description = "채팅방 목록 조회")
+@Tag(name = "채팅", description = "1:1채팅방 생성, 채팅방 목록 조회")
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/chat")
 public class ChatRoomController {
@@ -42,13 +42,12 @@ public class ChatRoomController {
     private final WSMessageService wsMessageService;
     private final LoadChatRoomUseCase loadChatRoomUseCase;
 
-//    @PostMapping("/create/direct")
-//    ApiResponse<?> createDirectChat(@RequestBody ChatRequest req,
-//                                    @RequestHeader("memberId") UUID hostId) throws Exception{
-//        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateDirectRoom(req, hostId);
-//
-//        return ApiUtils.successCreateWithDataResponse(chatRoom);
-//    }
+    @PostMapping("/create/direct")
+    ApiResponse<?> createDirectChat(@RequestBody ChatRequest req,
+                                    @RequestHeader("memberId") UUID hostId) throws Exception{
+        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateDirectRoom(req, hostId);
+        return ApiUtils.successCreateWithDataResponse(chatRoom);
+    }
 //
 //    @PostMapping("/create/accompany")
 //    ApiResponse<?> createAccompanyChat(@RequestBody ChatRequest req,
