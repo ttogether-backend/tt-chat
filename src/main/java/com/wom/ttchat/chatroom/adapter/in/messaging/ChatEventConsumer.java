@@ -82,7 +82,7 @@ public class ChatEventConsumer {
             chatRoomService.joinChatRoom(accompanyEvent);
 
             log.info("[Kafka-Event] topic : open accompany, consumed successfully");
-            throw new Exception("error");
+
         }catch (Exception e){
             log.error("[Kafka-Event] topic : open accompany, received message : {}, error message : {}", message, e.getMessage());
             rollBackProducer.rollBackOpenAccompany(openAccompanyEvent);
@@ -90,7 +90,6 @@ public class ChatEventConsumer {
     }
 
     @KafkaListener(topics = "${kafka.topic.sub.together.join-accompany}", errorHandler = "kafkaErrorHandler")
-//    @SendTo("${kafka.topic.pub.rollback.join-accompany}")
     public void listenJoinAccompany(String message)  throws JsonProcessingException {
         JoinAccompanyEvent joinAccompanyEvent = objectMapper.readValue(message, JoinAccompanyEvent.class);
 
@@ -99,7 +98,7 @@ public class ChatEventConsumer {
             chatRoomService.joinChatRoom(joinAccompanyEvent);
             log.info("[Kafka-Event] topic : join accompany, consumed successfully");
 
-            // throw new Exception("error");
+
         }catch (Exception e){
             log.error("[Kafka-Event] topic : join accompany, received message : {}, error message : {}", message, e.getMessage());
             rollBackProducer.rollBackJoinAccompany(joinAccompanyEvent);

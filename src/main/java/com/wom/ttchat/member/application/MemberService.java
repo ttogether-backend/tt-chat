@@ -50,7 +50,7 @@ public class MemberService implements UpdateMemberUserCase {
 	}
 
 	@Transactional
-	public void createMember(CreateMemberEvent createMemberEvent) {
+	public void createMember(CreateMemberEvent createMemberEvent) throws Exception {
 		Member member = Member.create(
 				new Member.MemberId(createMemberEvent.getMemberId()),
 				createMemberEvent.getNickname(),
@@ -59,6 +59,7 @@ public class MemberService implements UpdateMemberUserCase {
 				AccountStatus.valueOf(createMemberEvent.getAccountStatus())
 		);
 
-		updateMemberPort.updateMember(member);
+		updateMemberPort.createMember(member);
+
 	}
 }

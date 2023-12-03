@@ -16,7 +16,7 @@ public class MemberPersistenceAdapter implements UpdateMemberPort, LoadMemberPor
 	private final MemberMapper memberMapper;
 
 	@Override
-	public void updateMember(Member member) {
+	public void updateMember(Member member){
 		memberJpaRepository.save(memberMapper.mpaToJpaEntity(member));
 	}
 
@@ -26,5 +26,10 @@ public class MemberPersistenceAdapter implements UpdateMemberPort, LoadMemberPor
 			memberId.getValue()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 데이터입니다."));
 		
 		return memberMapper.mapToDomainEntity(jpaEntity);
+	}
+
+	@Override
+	public void createMember(Member member) throws Exception{
+		memberJpaRepository.save(memberMapper.mpaToJpaEntity(member));
 	}
 }

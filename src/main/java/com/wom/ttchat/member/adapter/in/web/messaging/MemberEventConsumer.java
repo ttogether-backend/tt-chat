@@ -22,7 +22,7 @@ public class MemberEventConsumer {
     private final MemberRollBackProducer memberRollBackProducer;
 
     @KafkaListener(topics = "${kafka.topic.sub.auth.create-member}", errorHandler = "kafkaErrorHandler")
-    public void listenExitAccompany(String message) throws JsonProcessingException {
+    public void listenCreateMember(String message) throws JsonProcessingException {
         CreateMemberEvent createMemberEvent = new CreateMemberEvent();
         try {
             createMemberEvent = objectMapper.readValue(message, CreateMemberEvent.class);

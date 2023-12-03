@@ -44,7 +44,7 @@ kafka:
       exit-chat: exit-chat
       kick-chat: kick-chat
       rollback:
-        create-member: rollback-create-member
+        create-member: auth-rollbackCreateMember
         update-member: rollback-update-member
         open-accompany: together-rollbackOpenAccompany
         join-accompany: together-rollbackJoinAccompany
@@ -53,14 +53,14 @@ kafka:
 
     sub:
       together:
-        create-member: create-member
+        create-member: auth-createMember
         update-member: update-member
         open-accompany: together-openAccompany
         join-accompany: together-joinAccompany
         exit-accompany: exit-accompany
         kick-accompany: kick-accompany
       auth:
-        create-member: create-member
+        create-member: auth-createMember
       rollback:
         exit-chat: rollback-exit-chat
         kick-chat: rollback-kick-chat
