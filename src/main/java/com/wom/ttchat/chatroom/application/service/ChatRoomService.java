@@ -132,7 +132,6 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
             ChatRoom chatRoom = findChatRoomPort.findByUid(info.getRoomUid());
 
             Participant participantInfo = findParticipantPort.findParticipantByRoomIdAndMemberId(chatRoom, memberId);
-            System.out.println("::status::"+participantInfo.getStatus());
 
             if (participantInfo==null)
                 throw new IllegalStateException(CommonCode.UNAUTHORIZED_ACCESS_CHATROOM.getMessage());
