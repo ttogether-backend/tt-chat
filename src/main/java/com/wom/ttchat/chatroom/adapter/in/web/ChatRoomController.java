@@ -12,19 +12,26 @@ import com.wom.ttchat.chatroom.application.port.in.QuitChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.service.ChatRoomService;
 
 import com.wom.ttchat.chatroom.domain.ChatRoom;
+import com.wom.ttchat.chatroom.domain.ChatRoomInfo;
 import com.wom.ttchat.common.ApiResponse;
 import com.wom.ttchat.common.ApiUtils;
 import com.wom.ttchat.common.dto.PageRequest;
 import com.wom.ttchat.member.domain.Member;
 import com.wom.ttchat.member.domain.Member.MemberId;
 import com.wom.ttchat.message.application.WSMessageService;
+import com.wom.ttchat.message.application.port.in.MessageUseCase;
+import com.wom.ttchat.message.domain.Message;
 import com.wom.ttchat.participant.application.service.RegisterParticipantService;
 import com.wom.ttchat.participant.domain.Participant;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -41,6 +48,7 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final WSMessageService wsMessageService;
     private final LoadChatRoomUseCase loadChatRoomUseCase;
+    private final MessageUseCase messageUseCase;
 
     @PostMapping("/create/direct")
     ApiResponse<?> createDirectChat(@RequestBody ChatRequest req,
@@ -48,17 +56,6 @@ public class ChatRoomController {
         ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateDirectRoom(req, hostId);
         return ApiUtils.successCreateWithDataResponse(chatRoom);
     }
-//
-//    @PostMapping("/create/accompany")
-//    ApiResponse<?> createAccompanyChat(@RequestBody ChatRequest req,
-//                                    @RequestHeader("memberId") UUID hostId) throws Exception {
-//        if (req.getAccompanyPostId() == null) {
-//            throw new IllegalStateException("동행글 아이디가 필요합니다.");
-//        }
-//        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateAccompanyRoom(req, hostId);
-//        return ApiUtils.successCreateWithDataResponse(chatRoom);
-//    }
-//
 //
 //    @PostMapping("/room/enter")
 //    ApiResponse<?> enterChatRoom(@RequestBody ChatRequest req,
@@ -104,7 +101,15 @@ public class ChatRoomController {
         @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize)throws Exception {
 
         return ApiUtils.successCreateWithDataResponse(
-            loadChatRoomUseCase.loadChatRoomList(new MemberId(memberId), PageRequest.of(pageNo, pageSize)));
+                loadChatRoomUseCase.loadChatRoomList(new MemberId(UUID.fromString(memberId.toString())), PageRequest.of(null, null)));
+
+    }
+
+    @GetMapping("/chat-room/{roomId}")
+    public List<Message> getMessageList(@RequestHeader("memberId") UUID memberId,
+                                        @PathVariable UUID roomId) throws Exception {
+        List<Message> messageList = messageUseCase.getMessageList(roomId, new MemberId(memberId));
+        return messageList;
     }
 
 }

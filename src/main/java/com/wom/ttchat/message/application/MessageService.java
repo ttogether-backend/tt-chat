@@ -49,7 +49,7 @@ public class MessageService implements MessageUseCase {
             if (!CommonUtils.isEmpty(participant.getUpdatedAt()))
                 readAt = participant.getUpdatedAt();
             else
-                readAt = LocalDateTime.now();
+                readAt = participant.getCreatedAt();
         }
 
         List<Message> messageList = new ArrayList<>();
