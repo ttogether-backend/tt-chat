@@ -48,6 +48,7 @@ public class MessageService implements MessageUseCase {
             //update로 하는 이유: 나갔다 들어왔을 때 대비
             if (!CommonUtils.isEmpty(participant.getUpdatedAt()))
                 readAt = participant.getUpdatedAt();
+            //readAt이 존재하지 않을 경우 유저가 채팅방에 참여한 순간을 기준으로 함
             else
                 readAt = participant.getCreatedAt();
         }
