@@ -40,7 +40,6 @@ public class WSMessageService implements WSMessageUseCase {
 
     @Override
     public void saveMessage(MessageRequest messageReq) throws Exception {
-        simpMessageSendingOperations.convertAndSend("/sub/room/" + messageReq.getRoomId() , messageReq);
         messagePostPort.saveMessage(messageMapper.mapRequestToJpaEntity(messageReq));
     }
 
