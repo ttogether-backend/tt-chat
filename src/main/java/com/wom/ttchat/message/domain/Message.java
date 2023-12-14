@@ -15,6 +15,7 @@ public class Message {
 	private MessageId messageId;
 	private String roomUID;
 	private String memberId;
+	private String nickname;
 	private String content;
 	private MessageType messageType;
 	private LocalDateTime createAt;
@@ -29,21 +30,23 @@ public class Message {
             MessageId messageId,
             String roomUId,
 			String memberId,
+			String nickname,
             String content,
             MessageType messageType,
             LocalDateTime createAt) {
-		return new Message(messageId, roomUId, memberId, content, messageType, createAt);
+		return new Message(messageId, roomUId, memberId, nickname, content, messageType, createAt);
 	}
 
 	// 객체 생성, 초기화
 	public static Message create(
 			String roomUId,
 			String memberId,
+			String nickname,
 			String content,
 			MessageType messageType,
 			LocalDateTime createAt
 	){
-		return new Message(null, roomUId, memberId, content, messageType, createAt);
+		return new Message(null, roomUId, memberId, nickname, content, messageType, createAt);
 	}
 
 	//  UUID와 정보를 사용하여 Product 객체 생성 및 초기화
@@ -51,10 +54,11 @@ public class Message {
 			MessageId messageId,
 			String roomUId,
 			String memberId,
+			String nickname,
 			String content,
 			MessageType messageType,
 			LocalDateTime createAt
 	){
-		return new Message(messageId, roomUId, memberId, content, messageType, createAt);
+		return new Message(messageId, roomUId, memberId, nickname, content, messageType, createAt);
 	}
 }

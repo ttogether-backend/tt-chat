@@ -30,6 +30,7 @@ public class MessageJpaEntity {
 	private String id;
 	private String roomUId;
 	private String memberId;
+	private String nickname;
 	private String content;
 	private MessageType type;
 	private LocalDateTime createAt;

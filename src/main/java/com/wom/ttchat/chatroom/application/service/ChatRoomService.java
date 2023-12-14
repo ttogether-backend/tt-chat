@@ -145,7 +145,7 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 if (!CommonUtils.isEmpty(participantInfo.getUpdatedAt()))
                     readAt = participantInfo.getUpdatedAt();
                 else
-                    readAt = LocalDateTime.now();
+                    readAt = participantInfo.getCreatedAt();
             }
 
             //강퇴당했을 경우 readAt<message_createAt<deleteAt
@@ -164,7 +164,7 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
             if(messageList.size()==0)
                 info.updateMessage(null, null, 0);
             else {
-                //채팅방의 마지막 메세지가 내가 보낸 메세지이면 안읽은개수 0
+                //채팅방의 마지막 메세지가 내가 보낸 메세지이면 안읽은개수
                 if (messageList.get(0).getMemberId().equals(memberId.getValue().toString()))
                     info.updateMessage(messageList.get(0).getContent(), messageList.get(0).getCreateAt(), 0);
                 else
