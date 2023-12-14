@@ -7,9 +7,9 @@ spring:
     active: dev
   main:
     allow-bean-definition-overriding: true
-  jpa:
-    hibernate:
-      ddl-auto: create
+#  jpa:
+#    hibernate:
+#      ddl-auto: create
 
 eureka:
   instance:
