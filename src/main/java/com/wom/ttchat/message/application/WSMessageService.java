@@ -39,8 +39,9 @@ public class WSMessageService implements WSMessageUseCase {
 
 
     @Override
-    public void saveMessage(MessageRequest messageReq) throws Exception {
-        messagePostPort.saveMessage(messageMapper.mapRequestToJpaEntity(messageReq));
+    public Message saveMessage(MessageRequest messageReq) throws Exception {
+        MessageJpaEntity savedMessage = messagePostPort.saveMessage(messageMapper.mapRequestToJpaEntity(messageReq));
+        return messageMapper.mapToDomainEntity(savedMessage);
     }
 
     @Override

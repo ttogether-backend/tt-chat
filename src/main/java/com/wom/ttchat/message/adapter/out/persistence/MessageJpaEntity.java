@@ -26,7 +26,6 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 public class MessageJpaEntity {
 
 	@Id
-	@Field(value = "_id", targetType = FieldType.OBJECT_ID)
 	private String id;
 	private String roomUId;
 	private String memberId;

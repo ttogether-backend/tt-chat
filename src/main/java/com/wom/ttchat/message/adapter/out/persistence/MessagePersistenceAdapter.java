@@ -19,8 +19,9 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
     private final MessageMapper messageMapper;
 
     @Override
-    public void saveMessage(MessageJpaEntity messageJpaEntity) throws Exception{
-        messageJpaRepository.save(messageJpaEntity);
+    public MessageJpaEntity saveMessage(MessageJpaEntity messageJpaEntity) throws Exception{
+        MessageJpaEntity savedMessage = messageJpaRepository.save(messageJpaEntity);
+        return savedMessage;
     }
 
     @Override

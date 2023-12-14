@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface WSMessageUseCase {
-    void saveMessage(MessageRequest message) throws Exception;
+    Message saveMessage(MessageRequest message) throws Exception;
     List<Message> getMessageList(UUID roomId, MemberId memberId) throws Exception;
 }

@@ -75,8 +75,8 @@ public class WSMessageController {
             String authorizationHeader = headerAccessor.getFirstNativeHeader("memberId");
             log.info("memberId = ", authorizationHeader);
             message.setSenderId(message.getSenderId());
-            messageUseCase.saveMessage(message);
-            simpMessageSendingOperations.convertAndSend("/sub/room/" + message.getRoomId() , message);
+            Message savedMessage = messageUseCase.saveMessage(message);
+            simpMessageSendingOperations.convertAndSend("/sub/room/" + message.getRoomId() , savedMessage);
             List<Participant> participants = findParticipantUseCase.getAllParticipants(UUID.fromString(message.getRoomId()));
             // 채팅방에 참여중인 모든 사람에게 채팅방이 업데이트 되었다는 메세지 전송
             for (Participant participant : participants) {

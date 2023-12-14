@@ -18,4 +18,5 @@ public interface FindChatRoomPort {
     List<ChatRoomInfo> findChatRoomListByMemberId(MemberId memberId, PageRequest pageRequest);
     ChatRoom findByAccompanyPostId(Long accompanyPostId);
     boolean isExistDirectRoomByHostAndGuestId(UUID hostId, UUID guestId);
+
 }
