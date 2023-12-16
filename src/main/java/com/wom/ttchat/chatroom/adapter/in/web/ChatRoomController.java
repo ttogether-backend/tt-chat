@@ -2,9 +2,6 @@ package com.wom.ttchat.chatroom.adapter.in.web;
 
 
 import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
-import com.wom.ttchat.chatroom.application.port.in.Command.BanChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.Command.EnterChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.Command.QuitChatRoomCommand;
 import com.wom.ttchat.chatroom.application.port.in.CreateChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.port.in.EnterChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.port.in.LoadChatRoomUseCase;
@@ -12,22 +9,16 @@ import com.wom.ttchat.chatroom.application.port.in.QuitChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.service.ChatRoomService;
 
 import com.wom.ttchat.chatroom.domain.ChatRoom;
-import com.wom.ttchat.chatroom.domain.ChatRoomInfo;
 import com.wom.ttchat.common.ApiResponse;
 import com.wom.ttchat.common.ApiUtils;
 import com.wom.ttchat.common.dto.PageRequest;
-import com.wom.ttchat.member.domain.Member;
 import com.wom.ttchat.member.domain.Member.MemberId;
 import com.wom.ttchat.message.application.WSMessageService;
 import com.wom.ttchat.message.application.port.in.MessageUseCase;
 import com.wom.ttchat.message.domain.Message;
 import com.wom.ttchat.participant.application.service.RegisterParticipantService;
-import com.wom.ttchat.participant.domain.Participant;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,7 +99,7 @@ public class ChatRoomController {
     @GetMapping("/chat-room/{roomId}")
     public List<Message> getMessageList(@RequestHeader("memberId") UUID memberId,
                                         @PathVariable UUID roomId) throws Exception {
-        List<Message> messageList = messageUseCase.getMessageList(roomId, new MemberId(memberId));
+        List<Message> messageList = messageUseCase.getAllMessagesInChatRoom(roomId, new MemberId(memberId));
         return messageList;
     }
 

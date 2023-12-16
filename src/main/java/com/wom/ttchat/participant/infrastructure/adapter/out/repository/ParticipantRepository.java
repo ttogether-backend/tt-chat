@@ -5,7 +5,7 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.hibernate.annotations.DynamicInsert;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,8 +32,8 @@ public interface ParticipantRepository extends JpaRepository<ParticipantJpaEntit
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE participants p SET p.read_at = :readAt WHERE p.room_id = :roomId AND p.member_id = :memberId", nativeQuery = true)
-    void updateReadyAtByRoomIdAndMemberId(@Param("readAt") LocalDateTime readAt, @Param("roomId") Long roomId, @Param("memberId") UUID memberId);
+    @Query(value = "UPDATE participants SET read_at = :readAt WHERE room_id = :roomId AND member_id = :memberId", nativeQuery = true)
+    void updateReadAtByRoomIdAndMemberId(@Param("readAt") LocalDateTime readAt, @Param("roomId") Long roomId, @Param("memberId") UUID memberId);
 
     Optional<ParticipantJpaEntity> findByMemberIdAndRoomId(UUID memberId, Long roomId);
 

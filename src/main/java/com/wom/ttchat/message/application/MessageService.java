@@ -10,6 +10,7 @@ import com.wom.ttchat.message.adapter.out.persistence.MessageJpaRepository;
 import com.wom.ttchat.message.application.port.in.MessageUseCase;
 import com.wom.ttchat.message.application.port.out.FindMessagePort;
 import com.wom.ttchat.message.domain.Message;
+import com.wom.ttchat.message.domain.MessageType;
 import com.wom.ttchat.participant.application.port.out.FindParticipantPort;
 import com.wom.ttchat.participant.domain.Participant;
 import com.wom.ttchat.participant.domain.ParticipantStatus;
@@ -37,7 +38,7 @@ public class MessageService implements MessageUseCase {
     }
 
     @Override
-    public List<Message> getMessageList(UUID roomId, MemberId memberId) throws Exception {
+    public List<Message> getAllMessagesInChatRoom(UUID roomId, MemberId memberId) throws Exception {
         ChatRoom chatRoom = findChatRoomPort.findByUid(roomId);
 
         Participant participant = findParticipantPort.findJoinParticipant(chatRoom, memberId);
@@ -53,19 +54,27 @@ public class MessageService implements MessageUseCase {
                 readAt = participant.getCreatedAt();
         }
 
-        List<Message> messageList = new ArrayList<>();
+        List<Message> messages;
         if (participant.getStatus().toString().equals(ParticipantStatus.BANNED.name())) {
             LocalDateTime banAt = participant.getUpdatedAt();
-            messageList = findMessagePort.findBanBeforeUnReadMessageList(roomId, readAt.plusHours(9), banAt.plusHours(9));
+            messages = findMessagePort.findBanBeforeUnReadMessageList(roomId, readAt.plusHours(9), banAt.plusHours(9));
         } else {
-            messageList = findMessagePort.findUnReadMessageList(roomId, readAt.plusHours(9));
+            messages = findMessagePort.findReadMessageList(roomId, readAt.plusHours(9));
+            List<Message> afterMessages = findMessagePort.findUnReadMessageList(roomId, readAt.plusHours(9));
+            if (afterMessages != null) {
+                messages.add(Message.builder()
+                        .messageId(null)
+                        .messageType(MessageType.SYS)
+                        .content("여기까지 읽었습니다.")
+                        .build());
+            }
+            messages.addAll(afterMessages);
         }
 
+        if (CommonUtils.isEmpty(messages))
+            messages = null;
 
-        if (CommonUtils.isEmpty(messageList))
-            messageList = null;
-
-        return messageList;
+        return messages;
 
     }
 

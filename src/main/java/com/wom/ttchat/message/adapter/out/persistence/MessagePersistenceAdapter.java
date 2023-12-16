@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -40,6 +42,15 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
         }
 
         return messageList;
+    }
+
+    @Override
+    public List<Message> findReadMessageList(UUID roomUid, LocalDateTime readAt) {
+        List<MessageJpaEntity> jpaEntityList =
+                messageJpaRepository.findAllByRoomUIdAndCreateAtBeforeOrderByCreateAt(roomUid.toString(), readAt);
+        return jpaEntityList.stream()
+                .map(messageMapper::mapToDomainEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

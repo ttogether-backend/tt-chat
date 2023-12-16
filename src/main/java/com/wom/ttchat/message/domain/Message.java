@@ -2,13 +2,12 @@ package com.wom.ttchat.message.domain;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
+
+import lombok.*;
 import org.bson.types.ObjectId;
 
 @Getter
+@Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Message {
