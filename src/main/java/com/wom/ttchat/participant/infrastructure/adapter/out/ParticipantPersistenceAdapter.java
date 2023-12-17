@@ -66,7 +66,7 @@ public class ParticipantPersistenceAdapter implements UpdateParticipantPort, Fin
 
     @Override
     public void updateParticipantReadAt(Long roomId, UUID memberId, LocalDateTime readAt) {
-        participantRepository.updateReadyAtByRoomIdAndMemberId(readAt, roomId, memberId);
+        participantRepository.updateReadAtByRoomIdAndMemberId(readAt, roomId, memberId);
     }
 
     @Override

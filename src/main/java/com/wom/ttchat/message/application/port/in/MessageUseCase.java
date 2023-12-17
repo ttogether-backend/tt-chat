@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface MessageUseCase {
     MessageJpaEntity saveMessage(MessageJpaEntity message);
-    List<Message> getMessageList(UUID roomId, MemberId memberId) throws Exception;
+    List<Message> getAllMessagesInChatRoom(UUID roomId, MemberId memberId) throws Exception;
 }

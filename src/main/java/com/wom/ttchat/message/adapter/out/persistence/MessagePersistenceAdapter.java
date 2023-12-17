@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -19,8 +21,9 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
     private final MessageMapper messageMapper;
 
     @Override
-    public void saveMessage(MessageJpaEntity messageJpaEntity) throws Exception{
-        messageJpaRepository.save(messageJpaEntity);
+    public MessageJpaEntity saveMessage(MessageJpaEntity messageJpaEntity) throws Exception{
+        MessageJpaEntity savedMessage = messageJpaRepository.save(messageJpaEntity);
+        return savedMessage;
     }
 
     @Override
@@ -30,7 +33,7 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
         typeList.add(MessageType.MAP);
 
         List<MessageJpaEntity> jpaEntityList =
-            messageJpaRepository.findAllByRoomUIdAndCreateAtAfterAndTypeInOrderByCreateAtDesc(
+            messageJpaRepository.findByRoomUIdAndCreateAtAfterAndTypeInOrderByCreateAtDesc(
                 roomUid.toString(), readAt, typeList);
 
         List<Message> messageList = new ArrayList<>();
@@ -42,17 +45,23 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
     }
 
     @Override
-    public List<Message> findUnReadMessageList(UUID roomUid, LocalDateTime readAt) {
+    public List<Message> findReadMessages(UUID roomUid, LocalDateTime readAt) {
         List<MessageJpaEntity> jpaEntityList =
-            messageJpaRepository.findAllByRoomUIdAndCreateAtAfterOrderByCreateAt(roomUid.toString(), readAt);
-
-        List<Message> messageList = new ArrayList<>();
-        for (MessageJpaEntity jpaEntity : jpaEntityList) {
-            messageList.add(messageMapper.mapToDomainEntity(jpaEntity));
-        }
-        return messageList;
-
+                messageJpaRepository.findByRoomUIdAndCreateAtBeforeOrderByCreateAt(roomUid.toString(), readAt);
+        return jpaEntityList.stream()
+                .map(messageMapper::mapToDomainEntity)
+                .collect(Collectors.toList());
     }
+
+    @Override
+    public List<Message> findUnReadMessages(UUID roomUid, LocalDateTime readAt) {
+        List<MessageJpaEntity> jpaEntityList =
+            messageJpaRepository.findByRoomUIdAndCreateAtAfterOrderByCreateAt(roomUid.toString(), readAt);
+        return jpaEntityList.stream()
+                .map(messageMapper::mapToDomainEntity)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public List<Message> findBanBeforeUnReadMessage(UUID roomUid, LocalDateTime readAt,
@@ -62,7 +71,7 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
         typeList.add(MessageType.MAP);
 
         List<MessageJpaEntity> jpaEntityList =
-            messageJpaRepository.findAllByRoomUIdAndCreateAtBetweenAndTypeInOrderByCreateAtDesc(
+            messageJpaRepository.findByRoomUIdAndCreateAtBetweenAndTypeInOrderByCreateAtDesc(
                 roomUid.toString(), readAt, banAt, typeList);
 
         List<Message> messageList = new ArrayList<>();
@@ -77,13 +86,24 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
     public List<Message> findBanBeforeUnReadMessageList(UUID roomUid, LocalDateTime readAt,
         LocalDateTime banAt) {
         List<MessageJpaEntity> jpaEntityList =
-            messageJpaRepository.findAllByAndRoomUIdAndCreateAtBetweenOrderByCreateAt(roomUid.toString(), readAt, banAt);
+            messageJpaRepository.findByAndRoomUIdAndCreateAtBetweenOrderByCreateAt(roomUid.toString(), readAt, banAt);
 
         List<Message> messageList = new ArrayList<>();
         for (MessageJpaEntity jpaEntity : jpaEntityList) {
             messageList.add(messageMapper.mapToDomainEntity(jpaEntity));
         }
         return messageList;
+    }
+
+    @Override
+    public long findUnReadMessagesCount(UUID roomUid, LocalDateTime readAt) {
+        return messageJpaRepository.countByRoomUIdAndCreateAtAfter(roomUid.toString(), readAt);
+    }
+
+    @Override
+    public Message findLastSentMessage(UUID roomUid) {
+        return messageMapper.mapToDomainEntity(
+                messageJpaRepository.findTopByRoomUIdOrderByCreateAtDesc(roomUid.toString()));
     }
 
 

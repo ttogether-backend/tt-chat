@@ -8,16 +8,14 @@ import com.wom.ttchat.common.annotation.UseCase;
 import com.wom.ttchat.member.domain.Member.MemberId;
 import com.wom.ttchat.message.adapter.in.request.MessageRequest;
 import com.wom.ttchat.message.adapter.out.persistence.MessageJpaEntity;
-import com.wom.ttchat.message.adapter.out.persistence.MessageJpaRepository;
 import com.wom.ttchat.message.adapter.out.persistence.MessageMapper;
-import com.wom.ttchat.message.application.port.in.MessageUseCase;
 import com.wom.ttchat.message.application.port.in.WSMessageUseCase;
 import com.wom.ttchat.message.application.port.out.FindMessagePort;
 import com.wom.ttchat.message.application.port.out.MessagePostPort;
 import com.wom.ttchat.message.domain.Message;
 import com.wom.ttchat.participant.application.port.out.FindParticipantPort;
 import com.wom.ttchat.participant.domain.Participant;
-import jakarta.ws.rs.NotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -39,9 +37,9 @@ public class WSMessageService implements WSMessageUseCase {
 
 
     @Override
-    public void saveMessage(MessageRequest messageReq) throws Exception {
-        simpMessageSendingOperations.convertAndSend("/sub/room/" + messageReq.getRoomId() , messageReq);
-        messagePostPort.saveMessage(messageMapper.mapRequestToJpaEntity(messageReq));
+    public Message saveMessage(MessageRequest messageReq) throws Exception {
+        MessageJpaEntity savedMessage = messagePostPort.saveMessage(messageMapper.mapRequestToJpaEntity(messageReq));
+        return messageMapper.mapToDomainEntity(savedMessage);
     }
 
     @Override
@@ -61,7 +59,7 @@ public class WSMessageService implements WSMessageUseCase {
                 readAt = LocalDateTime.now();
         }
 
-        List<Message> messageList = findMessagePort.findUnReadMessageList(roomId, readAt.plusHours(9));
+        List<Message> messageList = findMessagePort.findUnReadMessages(roomId, readAt.plusHours(9));
         if (CommonUtils.isEmpty(messageList))
             messageList = null;
 

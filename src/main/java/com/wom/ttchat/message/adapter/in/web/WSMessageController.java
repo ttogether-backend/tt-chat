@@ -11,8 +11,10 @@ import com.wom.ttchat.message.application.port.in.MessageUseCase;
 import com.wom.ttchat.message.application.port.in.WSMessageUseCase;
 import com.wom.ttchat.message.domain.Message;
 import com.wom.ttchat.message.domain.SystemMessage;
+import com.wom.ttchat.participant.application.port.in.FindParticipantUseCase;
 import com.wom.ttchat.participant.application.service.RegisterParticipantService;
 import com.wom.ttchat.participant.application.service.UpdateParticipantService;
+import com.wom.ttchat.participant.domain.Participant;
 import com.wom.ttchat.participant.domain.ParticipantStatus;
 import com.wom.ttchat.participant.infrastructure.adapter.out.entity.ParticipantJpaEntity;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,6 +53,8 @@ public class WSMessageController {
     private final WSMessageUseCase messageUseCase;
     private final RegisterParticipantService registerParticipantService;
     private final UpdateParticipantService updateParticipantService;
+    private final FindParticipantUseCase findParticipantUseCase;
+
 
     // 아래에서 사용되는 convertAndSend 를 사용하기 위해서 서언
     // convertAndSend 는 객체를 인자로 넘겨주면 자동으로 Message 객체로 변환 후 도착지로 전송한다.
@@ -68,11 +72,17 @@ public class WSMessageController {
     @SendTo("/sub/room")
     public void message(@Payload MessageRequest message, SimpMessageHeaderAccessor headerAccessor) {
         try{
-
             String authorizationHeader = headerAccessor.getFirstNativeHeader("memberId");
-            message.setSenderId(authorizationHeader);
-            messageUseCase.saveMessage(message);
-
+            log.info("memberId = ", authorizationHeader);
+            message.setSenderId(message.getSenderId());
+            Message savedMessage = messageUseCase.saveMessage(message);
+            simpMessageSendingOperations.convertAndSend("/sub/room/" + message.getRoomId() , savedMessage);
+            List<Participant> participants = findParticipantUseCase.getAllParticipants(UUID.fromString(message.getRoomId()));
+            // 채팅방에 참여중인 모든 사람에게 채팅방이 업데이트 되었다는 메세지 전송
+            for (Participant participant : participants) {
+                simpMessageSendingOperations.convertAndSend("/sub/chat-room/" + participant.getMember().getId().getValue().toString(), "update");
+                log.info("subscription uri : /sub/chat-room/" + participant.getMember().getId().getValue().toString());
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -115,7 +125,9 @@ public class WSMessageController {
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event){
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        log.info("disconnected : " + event.getCloseStatus());
+        String roomId = (String) accessor.getSessionAttributes().get("roomId");
+        String memberId = (String) accessor.getSessionAttributes().get("memberId");
+        log.info("disconnected roomId: {}, memberId : {}", roomId, memberId);
     }
 
 }

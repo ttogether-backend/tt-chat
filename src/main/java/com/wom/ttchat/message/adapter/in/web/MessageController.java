@@ -3,20 +3,19 @@ package com.wom.ttchat.message.adapter.in.web;
 import com.wom.ttchat.common.ApiResponse;
 import com.wom.ttchat.common.ApiUtils;
 import com.wom.ttchat.member.domain.Member.MemberId;
-import com.wom.ttchat.message.adapter.in.request.MessageRequest;
-import com.wom.ttchat.message.adapter.out.persistence.MessageJpaEntity;
 import com.wom.ttchat.message.application.MessageService;
 import com.wom.ttchat.message.application.port.in.MessageUseCase;
-import com.wom.ttchat.message.domain.MessageType;
+import com.wom.ttchat.message.domain.Message;
+
+import java.util.List;
 import java.util.UUID;
 
+import com.wom.ttchat.participant.application.port.in.UpdateParticipantUseCase;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.stereotype.Controller;
 
 import java.time.LocalDateTime;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +40,8 @@ public class MessageController {
     // 아래에서 사용되는 convertAndSend 를 사용하기 위해서 서언
     // convertAndSend 는 객체를 인자로 넘겨주면 자동으로 Message 객체로 변환 후 도착지로 전송한다.
     private final SimpMessageSendingOperations simpMessageSendingOperations;
+	private final UpdateParticipantUseCase updateParticipantUseCase;
+
 
     /*
         /sub/channel/12345      - 구독(channelId:12345)
@@ -70,8 +71,10 @@ public class MessageController {
 
 	@GetMapping("/{room_id}/message")
 	ApiResponse<?> getMessageList(@RequestHeader("memberId") UUID memberId, @PathVariable UUID room_id) throws Exception{
-			return ApiUtils.successCreateWithDataResponse(
-					messageUseCase.getMessageList(room_id, new MemberId(memberId)));
+			// readAt update하는 로직 추가
+		List<Message> messages = messageUseCase.getAllMessagesInChatRoom(room_id, new MemberId(memberId));
+			updateParticipantUseCase.updateReadAt(room_id, memberId, LocalDateTime.now());
+			return ApiUtils.successCreateWithDataResponse(messages);
 	}
 
 }

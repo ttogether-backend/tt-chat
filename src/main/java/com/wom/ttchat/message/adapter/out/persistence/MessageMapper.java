@@ -16,6 +16,7 @@ public class MessageMapper {
 			new MessageId(messageJpaEntity.getId()),
 			messageJpaEntity.getRoomUId(),
 			messageJpaEntity.getMemberId(),
+			messageJpaEntity.getNickname(),
 			messageJpaEntity.getContent(),
 			messageJpaEntity.getType(),
 			messageJpaEntity.getCreateAt().minusHours(9)
@@ -27,6 +28,7 @@ public class MessageMapper {
 			message.getMessageId() == null ? null : message.getMessageId().getValue(),
 			message.getRoomUID(),
 			message.getMemberId(),
+			message.getNickname(),
 			message.getContent(),
 			message.getMessageType(),
 			message.getCreateAt()
@@ -38,6 +40,7 @@ public class MessageMapper {
 				null,
 				message.getRoomId(),
 				message.getSenderId(),
+				message.getNickname(),
 				message.getContent(),
 				message.getMessageType(),
 				LocalDateTime.now().plusHours(9)

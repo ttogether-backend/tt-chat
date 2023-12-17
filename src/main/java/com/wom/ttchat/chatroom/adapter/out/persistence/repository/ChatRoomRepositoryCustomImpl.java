@@ -40,8 +40,8 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom{
 			.on(participantJpaEntity.room.accompanyPostId.eq(accompanyJpaEntity.accompanyPostId))
 			.where(participantJpaEntity.member.id.eq(memberId.getValue()),
 				participantJpaEntity.status.eq(ParticipantStatus.JOINED.name())
-					.or(participantJpaEntity.status.eq(ParticipantStatus.BANNED.name())
-						.and(participantJpaEntity.deleteAt.isNull())))
+//					.or(participantJpaEntity.status.eq(ParticipantStatus.BANNED.name())
+						.and(participantJpaEntity.deleteAt.isNull()))
 			.orderBy(participantJpaEntity.room.createdAt.asc());
 
 
