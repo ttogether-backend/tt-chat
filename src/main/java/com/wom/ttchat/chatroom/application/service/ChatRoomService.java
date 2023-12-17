@@ -136,8 +136,6 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
             if (participantInfo==null)
                 throw new IllegalStateException(CommonCode.UNAUTHORIZED_ACCESS_CHATROOM.getMessage());
 
-            List<Message> messageList = new ArrayList<>();
-
             LocalDateTime readAt = participantInfo.getReadAt();
             //참여자테이블에 읽은 시간 데이터가 없을 경우 참여한 시간 이후 메세지 조회
             if(CommonUtils.isEmpty(readAt)) {
@@ -147,28 +145,25 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 else
                     readAt = participantInfo.getCreatedAt();
             }
-
+            Message lastSentMsg;
             //강퇴당했을 경우 readAt<message_createAt<deleteAt
             if (participantInfo.getStatus().toString().equals(ParticipantStatus.BANNED.name())) {
                 LocalDateTime banAt = participantInfo.getUpdatedAt();
-
-                messageList =
-                    findMessagePort.findBanBeforeUnReadMessage(info.getRoomUid(),
-                        readAt.plusHours(9), banAt.plusHours(9));
+                lastSentMsg = null;
             } else {
                 //마지막으로 읽은 메세지 정보 추가
-                messageList =
-                    findMessagePort.findUnReadMessage(info.getRoomUid(), readAt.plusHours(9));
+                lastSentMsg =
+                    findMessagePort.findLastSentMessage(info.getRoomUid());
             }
-
-            if(messageList.size()==0)
+            if(CommonUtils.isEmpty(lastSentMsg))
                 info.updateMessage(null, null, 0);
             else {
                 //채팅방의 마지막 메세지가 내가 보낸 메세지이면 안읽은개수
-                if (messageList.get(0).getMemberId().equals(memberId.getValue().toString()))
-                    info.updateMessage(messageList.get(0).getContent(), messageList.get(0).getCreateAt(), 0);
+                if (lastSentMsg.getMemberId().equals(memberId.getValue().toString()))
+                    info.updateMessage(lastSentMsg.getContent(), lastSentMsg.getCreateAt(), 0);
                 else
-                    info.updateMessage(messageList.get(0).getContent(), messageList.get(0).getCreateAt(), messageList.size());
+                    info.updateMessage(lastSentMsg.getContent(), lastSentMsg.getCreateAt(),
+                            findMessagePort.findUnReadMessagesCount(info.getRoomUid(), readAt));
             }
 
             //참여자 추가

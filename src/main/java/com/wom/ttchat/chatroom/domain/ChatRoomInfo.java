@@ -20,7 +20,7 @@ public class ChatRoomInfo {
 	int participantCnt;
 	String lastMessage;
 	LocalDateTime lastMessageAt;
-	int notReadCnt;
+	long notReadCnt;
 
 	public ChatRoomInfo (UUID roomUid, String chatRoomTitle, String accompanyStatus, String accompanyPostTitle) {
 		this.roomUid = roomUid;
@@ -34,7 +34,7 @@ public class ChatRoomInfo {
 		this.participantCnt = participantList.size();
 	}
 
-	public void updateMessage(String lastMessage, LocalDateTime lastMessageAt, int notReadCnt) {
+	public void updateMessage(String lastMessage, LocalDateTime lastMessageAt, long notReadCnt) {
 		this.lastMessage = lastMessage;
 		this.lastMessageAt = lastMessageAt;
 		this.notReadCnt = notReadCnt;

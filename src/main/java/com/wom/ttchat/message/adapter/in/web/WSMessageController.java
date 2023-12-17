@@ -125,7 +125,9 @@ public class WSMessageController {
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event){
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        log.info("disconnected : " + event.getCloseStatus());
+        String roomId = (String) accessor.getSessionAttributes().get("roomId");
+        String memberId = (String) accessor.getSessionAttributes().get("memberId");
+        log.info("disconnected roomId: {}, memberId : {}", roomId, memberId);
     }
 
 }
