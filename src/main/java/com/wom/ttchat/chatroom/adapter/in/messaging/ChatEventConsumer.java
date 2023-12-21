@@ -2,6 +2,9 @@ package com.wom.ttchat.chatroom.adapter.in.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wom.ttchat.accompany.application.AccompanyService;
+import com.wom.ttchat.accompany.application.port.in.command.RegisterAccompanyCommand;
+import com.wom.ttchat.accompany.domain.AccompanyStatus;
 import com.wom.ttchat.chatroom.adapter.in.messaging.event.ExitAccompanyEvent;
 import com.wom.ttchat.chatroom.adapter.in.messaging.event.JoinAccompanyEvent;
 import com.wom.ttchat.chatroom.adapter.in.messaging.event.KickAccompanyEvent;
@@ -13,13 +16,8 @@ import com.wom.ttchat.member.domain.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -29,6 +27,7 @@ public class ChatEventConsumer {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ChatRoomService chatRoomService;
     private final ChatRollBackProducer rollBackProducer;
+    private final AccompanyService accompanyService;
 
     @KafkaListener(topics = "${kafka.topic.sub.together.exit-accompany}", errorHandler = "kafkaErrorHandler",
             clientIdPrefix = "exit-accompany-client")
@@ -68,11 +67,19 @@ public class ChatEventConsumer {
         try{
             log.info("[Kafka-Event] topic : open accompany, received message : {}", message);
             UUID hostId = openAccompanyEvent.getMemberId();
+            Member.MemberId memberId = new Member.MemberId(hostId);
             Long accompanyId = openAccompanyEvent.getAccompanyId();
-            // 방 생성
+            String accompanyPostName = openAccompanyEvent.getAccompanyPostName();
+
+
+            // 동행
+            RegisterAccompanyCommand accompanyCommand = new RegisterAccompanyCommand(accompanyId, null, AccompanyStatus.READY, accompanyPostName, memberId);
+            accompanyService.registerAccompany(accompanyCommand);
+
+            // 채팅방
             chatRoomService.createRoom(new CreateChatRoomCommand(
-                    new Member.MemberId(hostId),
-                    openAccompanyEvent.getAccompanyPostName(),
+                    memberId,
+                    accompanyPostName,
                     true,
                     accompanyId
             ));
@@ -84,6 +91,7 @@ public class ChatEventConsumer {
             log.info("[Kafka-Event] topic : open accompany, consumed successfully");
 
         }catch (Exception e){
+            e.printStackTrace();
             log.error("[Kafka-Event] topic : open accompany, received message : {}, error message : {}", message, e.getMessage());
             rollBackProducer.rollBackOpenAccompany(openAccompanyEvent);
         }
