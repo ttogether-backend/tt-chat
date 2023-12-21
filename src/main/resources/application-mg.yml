@@ -1,9 +1,9 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/chat
-    username: tech_eese
-    password: 1234
+    url: jdbc:postgresql://localhost:5431/chat
+    username: postgres
+    password: postgres
     driver-class-name: org.postgresql.Driver
   data:
     mongodb:

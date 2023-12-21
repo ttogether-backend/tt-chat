@@ -34,8 +34,8 @@ logging:
           socket: DEBUG
 
 kafka:
-#  bootstrapAddress: ${BOOTSTRAP_1}, ${BOOTSTRAP_2}, ${BOOTSTRAP_3}
-  bootstrapAddress: localhost:9091, localhost:9092, localhost:9093
+  bootstrapAddress: ${BOOTSTRAP_1}, ${BOOTSTRAP_2}, ${BOOTSTRAP_3}
+#  bootstrapAddress: localhost:9091, localhost:9092, localhost:9093
   properties:
     request.timeout.ms: 20000
     retry.backoff.ms: 500
@@ -44,23 +44,23 @@ kafka:
       exit-chat: exit-chat
       kick-chat: kick-chat
       rollback:
-        create-member: auth-rollbackCreateMember
+        create-member: rollback-create-member
         update-member: rollback-update-member
-        open-accompany: together-rollbackOpenAccompany
-        join-accompany: together-rollbackJoinAccompany
+        open-accompany: rollback-open-accompany
+        join-accompany: rollback-join-accompany
         exit-accompany: rollback-exit-accompany
         kick-accompany: rollback-kick-accompany
 
     sub:
       together:
-        create-member: auth-createMember
+        create-member: create-member
         update-member: update-member
-        open-accompany: together-openAccompany
-        join-accompany: together-joinAccompany
+        open-accompany: open-accompany
+        join-accompany: join-accompany
         exit-accompany: exit-accompany
         kick-accompany: kick-accompany
       auth:
-        create-member: auth-createMember
+        create-member: create-member
       rollback:
         exit-chat: rollback-exit-chat
         kick-chat: rollback-kick-chat
