@@ -12,7 +12,6 @@ public interface LoadChatRoomUseCase {
 
      ChatRoomResponse loadChatRoom(UUID chatRoomUId) throws Exception;
      List<ChatRoomInfo> loadChatRoomList(MemberId memberId, PageRequest pageRequest) throws Exception;
-
      boolean existDirectRoomByHostAndGuestId(UUID hostId, UUID guestId) throws Exception;
 
 }

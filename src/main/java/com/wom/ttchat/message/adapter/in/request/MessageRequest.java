@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 public class MessageRequest {
     private String roomId;
     private String senderId;
+    private String receiverId;
     private String nickname;
     private String content;
     private MessageType messageType;

@@ -89,11 +89,6 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     @Override
     @Transactional
     public Participant transactionalEnterChatRoom(EnterChatRoomCommand command) throws Exception {
-        // 챗DB에 accompany member 테이블이 없는 관계로 해당 기능 보류
-        // 테이블 못만드는 이유
-        // 테이블을 생성하더라도 MSA 설계원칙에 따라 동행 서비스에서 동행 멤버 생성 API 발송을 해주지 못함
-        // 또한 MSA 설계원칙에 따라 동행DB를 조회할 수 없음.
-        // boolean isMember =  isAccompanyMember(command);
         Participant participant = enterChatRoom(command);
         wsMessageService.saveMessage(MessageRequest.builder()
                 .roomId(command.getRoomId().toString())
@@ -267,7 +262,7 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     }
 
     @Override
-    public ChatRoom createRoom(CreateChatRoomCommand command) throws Exception {
+    public ChatRoom createGroupChat(CreateChatRoomCommand command) throws Exception {
         Member member = loadMemberPort.loadMember(command.getHostId());
 
         Accompany accompany = null;
@@ -290,13 +285,13 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 .name(room_name)
                 .isGroup(command.isGroup())
                 .build();
-        return saveChatRoomPort.saveChatRoom(chatRoom);
+        return saveChatRoomPort.saveGroupChat(chatRoom);
     }
 
     @Override
     @Transactional
     public ChatRoom transactionalCreateAccompanyRoom(ChatRequest req, UUID hostId) throws Exception {
-        ChatRoom chatRoom = createRoom(new CreateChatRoomCommand(
+        ChatRoom chatRoom = createGroupChat(new CreateChatRoomCommand(
                 new MemberId(hostId), req.getName(), ChatStat.GROUP.getStat(), req.getAccompanyPostId()
         ));
         enterChatRoom(new EnterChatRoomCommand(
@@ -309,7 +304,7 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     @Transactional
     public ChatRoom transactionalCreateDirectRoom(ChatRequest req, UUID hostId) throws Exception{
 
-        ChatRoom chatRoom = createRoom(new CreateChatRoomCommand(
+        ChatRoom chatRoom = createGroupChat(new CreateChatRoomCommand(
                 new MemberId(hostId), req.getName(), ChatStat.DIRECT.getStat(), req.getAccompanyPostId()
         ));
 

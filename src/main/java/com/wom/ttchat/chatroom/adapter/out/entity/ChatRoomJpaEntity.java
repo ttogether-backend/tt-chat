@@ -37,6 +37,9 @@ public class ChatRoomJpaEntity {
     @ManyToOne
     @JoinColumn(name = "host_member_id")
     private MemberJpaEntity hostMemberId;
+    @ManyToOne
+    @JoinColumn(name = "part_member_id")
+    private MemberJpaEntity partMemberId;
     @Column
     private boolean isGroup;
     @Column

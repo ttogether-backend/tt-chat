@@ -7,7 +7,7 @@ import com.wom.ttchat.chatroom.domain.ChatRoom;
 import java.util.UUID;
 
 public interface CreateChatRoomUseCase {
-    ChatRoom createRoom(CreateChatRoomCommand command) throws Exception;
+    ChatRoom createGroupChat(CreateChatRoomCommand command) throws Exception;
 
     ChatRoom transactionalCreateDirectRoom(ChatRequest req, UUID hostId) throws Exception;
     ChatRoom transactionalCreateAccompanyRoom(ChatRequest req, UUID hostId) throws Exception;

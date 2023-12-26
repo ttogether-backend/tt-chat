@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import static com.wom.ttchat.participant.infrastructure.adapter.out.entity.QParticipantJpaEntity.participantJpaEntity;
@@ -18,6 +19,7 @@ import static com.wom.ttchat.accompany.adapter.out.persistence.QAccompanyJpaEnti
 import static com.wom.ttchat.chatroom.adapter.out.entity.QChatRoomJpaEntity.chatRoomJpaEntity;
 
 @Repository
+@Slf4j
 @RequiredArgsConstructor
 public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom{
 
@@ -53,11 +55,15 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom{
 	}
 
 	@Override
-	public boolean isExistDirectRoomByHostAndGuestId(UUID hostId, UUID guestId) {
-		Boolean test2 = jpaQueryFactory.select(participantJpaEntity.member.id.count().intValue().gt(0)).from(participantJpaEntity)
-				.where(participantJpaEntity.room.hostMemberId.id.eq(hostId),
-						participantJpaEntity.member.id.eq(guestId)).fetchOne();
-		return  test2;
+	public UUID isExistDirectRoomByHostAndGuestId(UUID memberId, UUID anotherMemberId) {
+//		Boolean test2 = jpaQueryFactory.select(participantJpaEntity.member.id.count().intValue().gt(0)).from(participantJpaEntity)
+//				.where(participantJpaEntity.room.hostMemberId.id.eq(hostId),
+//						participantJpaEntity.member.id.eq(guestId)).fetchOne();
+		UUID result = jpaQueryFactory.select(chatRoomJpaEntity.uid).from(chatRoomJpaEntity)
+				.where((chatRoomJpaEntity.hostMemberId.id.eq(memberId).and(chatRoomJpaEntity.partMemberId.id.eq(anotherMemberId)))
+						.or(chatRoomJpaEntity.hostMemberId.id.eq(anotherMemberId).and(chatRoomJpaEntity.partMemberId.id.eq(memberId)))).fetchOne();
+		log.info("query result = {}", result);
+		return result;
 	}
 
 

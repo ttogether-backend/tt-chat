@@ -5,7 +5,7 @@ import com.wom.ttchat.chatroom.domain.ChatRoom;
 
 public interface SaveChatRoomPort {
 
-    void saveChatRoom(ChatRoomJpaEntity chatRoomJpaEntity) throws Exception;
-    ChatRoom saveChatRoom(ChatRoom chatRoom);
+    void saveGroupChat(ChatRoomJpaEntity chatRoomJpaEntity) throws Exception;
 
+    ChatRoom saveGroupChat(ChatRoom chatRoom);
 }

@@ -1,6 +1,8 @@
 package com.wom.ttchat.message.adapter.in.web;
 
 import com.wom.ttchat.chatroom.adapter.out.entity.ChatRoomJpaEntity;
+import com.wom.ttchat.chatroom.application.port.in.LoadChatRoomUseCase;
+import com.wom.ttchat.chatroom.application.port.out.FindChatRoomPort;
 import com.wom.ttchat.common.ApiResponse;
 import com.wom.ttchat.common.ApiUtils;
 import com.wom.ttchat.member.domain.Member.MemberId;
@@ -54,6 +56,7 @@ public class WSMessageController {
     private final RegisterParticipantService registerParticipantService;
     private final UpdateParticipantService updateParticipantService;
     private final FindParticipantUseCase findParticipantUseCase;
+    private final LoadChatRoomUseCase loadChatRoomUseCase;
 
 
     // 아래에서 사용되는 convertAndSend 를 사용하기 위해서 서언
@@ -72,6 +75,9 @@ public class WSMessageController {
     @SendTo("/sub/room")
     public void message(@Payload MessageRequest message, SimpMessageHeaderAccessor headerAccessor) {
         try{
+            if (message.getMessageType().equals("CREATE")) {
+
+            }
             String authorizationHeader = headerAccessor.getFirstNativeHeader("memberId");
             log.info("memberId = ", authorizationHeader);
             message.setSenderId(message.getSenderId());
