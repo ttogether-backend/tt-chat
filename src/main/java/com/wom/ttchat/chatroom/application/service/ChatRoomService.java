@@ -8,10 +8,7 @@ import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
 import com.wom.ttchat.accompany.application.port.out.LoadAccompanyPort;
 import com.wom.ttchat.accompany.domain.Accompany;
 import com.wom.ttchat.chatroom.adapter.in.web.response.ChatRoomResponse;
-import com.wom.ttchat.chatroom.application.port.in.Command.BanChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.Command.CreateChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.Command.EnterChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.Command.QuitChatRoomCommand;
+import com.wom.ttchat.chatroom.application.port.in.Command.*;
 import com.wom.ttchat.chatroom.application.port.in.CreateChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.port.in.EnterChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.port.in.LoadChatRoomUseCase;
@@ -289,6 +286,21 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     }
 
     @Override
+    public ChatRoom createDirectChat(CreateDirectChatCommand command) throws Exception {
+        Member host = loadMemberPort.loadMember(command.getHostId());
+        Member guest = loadMemberPort.loadMember(command.getGuestId());
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .chatRoomUUID(UUID.randomUUID())
+                .createdAt(LocalDateTime.now())
+                .hostMemberId(host)
+                .partMemberId(guest)
+                .isGroup(false)
+                .build();
+        return saveChatRoomPort.saveDirectChat(chatRoom);
+    }
+
+    @Override
     @Transactional
     public ChatRoom transactionalCreateAccompanyRoom(ChatRequest req, UUID hostId) throws Exception {
         ChatRoom chatRoom = createGroupChat(new CreateChatRoomCommand(
@@ -302,29 +314,21 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
 
     @Override
     @Transactional
-    public ChatRoom transactionalCreateDirectRoom(ChatRequest req, UUID hostId) throws Exception{
+    public ChatRoom transactionalCreateDirectRoom(UUID guestId, UUID hostId) throws Exception{
 
-        ChatRoom chatRoom = createGroupChat(new CreateChatRoomCommand(
-                new MemberId(hostId), req.getName(), ChatStat.DIRECT.getStat(), req.getAccompanyPostId()
-        ));
-
-        if(req.getAccompanyPostId() == null && existDirectRoomByHostAndGuestId(hostId, req.getMemberId())){
-           throw new IllegalStateException("이미 만들어진 상대방과의 개인 채팅방이 있습니다.");
-        }
+        ChatRoom chatRoom = createDirectChat(new CreateDirectChatCommand(new MemberId(hostId), new MemberId(guestId)));
 
         enterChatRoom(new EnterChatRoomCommand(
                 new MemberId(hostId), chatRoom.getChatRoomUUID()
         ));
         enterChatRoom(new EnterChatRoomCommand(
-                new MemberId(req.getMemberId()), chatRoom.getChatRoomUUID()
+                new MemberId(guestId), chatRoom.getChatRoomUUID()
         ));
-
         return chatRoom;
     }
-
     @Override
-    public boolean existDirectRoomByHostAndGuestId(UUID hostId, UUID guestId) throws Exception {
-        return findChatRoomPort.isExistDirectRoomByHostAndGuestId(hostId, guestId);
+    public UUID loadChatRoomByHostAndGuestId(UUID hostId, UUID guestId) throws Exception {
+        return findChatRoomPort.findUUIDByHostIdAndMemberId(hostId, guestId);
     }
 
     public void joinChatRoom(JoinAccompanyEvent event) throws Exception {

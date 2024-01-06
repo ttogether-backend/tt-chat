@@ -9,7 +9,6 @@ import java.util.UUID;
 
 public interface ChatRoomRepositoryCustom {
 	List<ChatRoomInfo> findChatRoomListByMemberId(MemberId memberId, PageRequest pageRequest);
-
-	UUID isExistDirectRoomByHostAndGuestId(UUID hostId, UUID guestId);
-
+	// 확인이 아니라 채팅방 생성되게 변경
+	UUID findDirectRoomByHostAndGuestId(UUID memberId, UUID anotherMemberId);
 }

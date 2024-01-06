@@ -39,7 +39,7 @@ public class ParticipantPersistenceAdapter implements UpdateParticipantPort, Fin
     public Participant updateParticipant(Participant participant) {
         ParticipantJpaEntity updated = participantRepository.save(
                 participantMapper.mapToJpaEntity(participant,
-                        memberMapper.mpaToJpaEntity(participant.getMember()),
+                        memberMapper.mapToJpaEntity(participant.getMember()),
                         chatRoomMapper.mapToJpaEntity(participant.getChatRoom(), null, null))
         );
         return participantMapper.mapToDomainEntity(

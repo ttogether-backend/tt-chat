@@ -37,13 +37,28 @@ public class ChatRoomPersistenceAdapter implements SaveChatRoomPort, FindChatRoo
         ChatRoomJpaEntity saved = chatRoomJpaRepository.save(
                 chatRoomMapper.mapToJpaEntity(
                 chatRoom,
-                memberMapper.mpaToJpaEntity(chatRoom.getHostMemberId()),
+                memberMapper.mapToJpaEntity(chatRoom.getHostMemberId()),
                         null
         ));
         return chatRoomMapper.mapToDomainEntity(
                 saved,
                 memberMapper.mapToDomainEntity(saved.getHostMemberId()),
                 null
+        );
+    }
+
+    @Override
+    public ChatRoom saveDirectChat(ChatRoom chatRoom) {
+        ChatRoomJpaEntity saved = chatRoomJpaRepository.save(
+                chatRoomMapper.mapToJpaEntity(
+                        chatRoom,
+                        memberMapper.mapToJpaEntity(chatRoom.getHostMemberId()),
+                        memberMapper.mapToJpaEntity(chatRoom.getPartMemberId())
+                ));
+        return chatRoomMapper.mapToDomainEntity(
+                saved,
+                memberMapper.mapToDomainEntity(saved.getHostMemberId()),
+                memberMapper.mapToDomainEntity(saved.getPartMemberId())
         );
     }
 
@@ -86,10 +101,9 @@ public class ChatRoomPersistenceAdapter implements SaveChatRoomPort, FindChatRoo
         }
         return null;
     }
-
     @Override
-    public boolean isExistDirectRoomByHostAndGuestId(UUID hostId, UUID guestId) {
-        return !(chatRoomJpaRepository.isExistDirectRoomByHostAndGuestId(hostId, guestId) == null);
+    public UUID findUUIDByHostIdAndMemberId(UUID hostId, UUID guestId) {
+        return chatRoomJpaRepository.findDirectRoomByHostAndGuestId(hostId, guestId);
     }
 
 

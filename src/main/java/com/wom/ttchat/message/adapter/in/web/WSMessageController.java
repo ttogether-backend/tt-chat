@@ -75,7 +75,7 @@ public class WSMessageController {
     @SendTo("/sub/room")
     public void message(@Payload MessageRequest message, SimpMessageHeaderAccessor headerAccessor) {
         try{
-            if (message.getMessageType().equals("CREATE")) {
+            if (message.getRoomId().equals(null) && message.getReceiverId() != null) {
 
             }
             String authorizationHeader = headerAccessor.getFirstNativeHeader("memberId");

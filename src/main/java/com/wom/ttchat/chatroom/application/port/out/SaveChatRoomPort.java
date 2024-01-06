@@ -8,4 +8,5 @@ public interface SaveChatRoomPort {
     void saveGroupChat(ChatRoomJpaEntity chatRoomJpaEntity) throws Exception;
 
     ChatRoom saveGroupChat(ChatRoom chatRoom);
+    ChatRoom saveDirectChat(ChatRoom chatRoom);
 }

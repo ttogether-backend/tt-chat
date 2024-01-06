@@ -17,7 +17,7 @@ public class MemberPersistenceAdapter implements UpdateMemberPort, LoadMemberPor
 
 	@Override
 	public void updateMember(Member member){
-		memberJpaRepository.save(memberMapper.mpaToJpaEntity(member));
+		memberJpaRepository.save(memberMapper.mapToJpaEntity(member));
 	}
 
 	@Override
@@ -30,6 +30,6 @@ public class MemberPersistenceAdapter implements UpdateMemberPort, LoadMemberPor
 
 	@Override
 	public void createMember(Member member) throws Exception{
-		memberJpaRepository.save(memberMapper.mpaToJpaEntity(member));
+		memberJpaRepository.save(memberMapper.mapToJpaEntity(member));
 	}
 }

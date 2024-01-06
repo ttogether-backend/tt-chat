@@ -54,8 +54,9 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom{
 
 	}
 
+	// 확인이 아니라 채팅방 생성되게 변경
 	@Override
-	public UUID isExistDirectRoomByHostAndGuestId(UUID memberId, UUID anotherMemberId) {
+	public UUID findDirectRoomByHostAndGuestId(UUID memberId, UUID anotherMemberId) {
 //		Boolean test2 = jpaQueryFactory.select(participantJpaEntity.member.id.count().intValue().gt(0)).from(participantJpaEntity)
 //				.where(participantJpaEntity.room.hostMemberId.id.eq(hostId),
 //						participantJpaEntity.member.id.eq(guestId)).fetchOne();
