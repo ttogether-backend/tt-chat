@@ -323,7 +323,9 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     @Override
     @Transactional
     public ChatRoom transactionalCreateDirectRoom(UUID guestId, UUID hostId) throws Exception{
-
+        if (guestId == hostId) {
+            throw new IllegalStateException("스스로와 채팅방을 생성할 수 없습니다.");
+        }
         ChatRoom chatRoom = createDirectChat(new CreateDirectChatCommand(new MemberId(hostId), new MemberId(guestId)));
 
         enterChatRoom(new EnterChatRoomCommand(
