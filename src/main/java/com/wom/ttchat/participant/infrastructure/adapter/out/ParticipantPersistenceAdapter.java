@@ -18,9 +18,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
 
+@Slf4j
 @PersistenceAdapter
 @RequiredArgsConstructor
 public class ParticipantPersistenceAdapter implements UpdateParticipantPort, FindParticipantPort {
@@ -91,7 +93,7 @@ public class ParticipantPersistenceAdapter implements UpdateParticipantPort, Fin
     public Participant findParticipantByRoomIdAndMemberId(ChatRoom chatRoom, MemberId memberId) {
         ParticipantJpaEntity jpaEntity =
             participantRepository.findByRoomIdAndMemberId(chatRoom.getChatRoomId(), memberId.getValue());
-
+        log.info("participants : {}", jpaEntity);
 
         if (jpaEntity == null) {
             return null;

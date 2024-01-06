@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 public class MemberMapper {
 
 	public Member mapToDomainEntity(MemberJpaEntity jpaEntity) {
+		if (jpaEntity == null)
+			return null;
 		return Member.generateMember(
 			new MemberId(jpaEntity.getId()),
 			jpaEntity.getNickname(),
@@ -20,6 +22,8 @@ public class MemberMapper {
 	}
 
 	public MemberJpaEntity mapToJpaEntity(Member member) {
+		if (member == null)
+			return null;
 		return new MemberJpaEntity(
 			member.getId().getValue(),
 			member.getNickname(),

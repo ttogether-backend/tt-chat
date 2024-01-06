@@ -102,8 +102,9 @@ public class MessagePersistenceAdapter implements MessagePostPort, FindMessagePo
 
     @Override
     public Message findLastSentMessage(UUID roomUid) {
-        return messageMapper.mapToDomainEntity(
-                messageJpaRepository.findTopByRoomUIdOrderByCreateAtDesc(roomUid.toString()));
+        MessageJpaEntity messageJpaEntity = messageJpaRepository.findTopByRoomUIdOrderByCreateAtDesc(roomUid.toString());
+        return messageJpaEntity != null ? messageMapper.mapToDomainEntity(
+                messageJpaRepository.findTopByRoomUIdOrderByCreateAtDesc(roomUid.toString())) : null;
     }
 
 

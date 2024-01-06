@@ -119,12 +119,24 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     @Override
     public List<ChatRoomInfo> loadChatRoomList(MemberId memberId, PageRequest pageRequest) throws Exception {
         List<ChatRoomInfo> chatRoomInfoList = findChatRoomPort.findChatRoomListByMemberId(memberId, pageRequest);
-
+        List<ChatRoomInfo> result = new ArrayList<>();
         for(ChatRoomInfo info : chatRoomInfoList) {
             ChatRoom chatRoom = findChatRoomPort.findByUid(info.getRoomUid());
-
             Participant participantInfo = findParticipantPort.findParticipantByRoomIdAndMemberId(chatRoom, memberId);
 
+            Message lastSentMsg;
+            //강퇴당했을 경우 readAt<message_createAt<deleteAt
+            if (participantInfo.getStatus().toString().equals(ParticipantStatus.BANNED.name())) {
+                LocalDateTime banAt = participantInfo.getUpdatedAt();
+                lastSentMsg = null;
+            } else {
+                //마지막으로 읽은 메세지 정보 추가
+                lastSentMsg =
+                        findMessagePort.findLastSentMessage(info.getRoomUid());
+            }
+            if (lastSentMsg == null) {
+                continue;
+            }
             if (participantInfo==null)
                 throw new IllegalStateException(CommonCode.UNAUTHORIZED_ACCESS_CHATROOM.getMessage());
 
@@ -137,16 +149,8 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 else
                     readAt = participantInfo.getCreatedAt();
             }
-            Message lastSentMsg;
-            //강퇴당했을 경우 readAt<message_createAt<deleteAt
-            if (participantInfo.getStatus().toString().equals(ParticipantStatus.BANNED.name())) {
-                LocalDateTime banAt = participantInfo.getUpdatedAt();
-                lastSentMsg = null;
-            } else {
-                //마지막으로 읽은 메세지 정보 추가
-                lastSentMsg =
-                    findMessagePort.findLastSentMessage(info.getRoomUid());
-            }
+
+
             if(CommonUtils.isEmpty(lastSentMsg))
                 info.updateMessage(null, null, 0);
             else {
@@ -163,13 +167,17 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
 
             List<Member> members = new ArrayList<>();
             for (Participant participant : participantList) {
+                log.info("chat Title : {}, participant : {}", info.getChatRoomTitle(), participant.getMember().getNickname());
+                if (info.getChatRoomTitle() == null && !participant.getMember().getId().equals(memberId)) {
+                    info.updateTitleForGuestName(participant.getMember());
+                }
                 members.add(participant.getMember());
             }
             info.updateParticipantList(members);
-
+            result.add(info);
         }
 
-        return chatRoomInfoList;
+        return result;
     }
 
 
