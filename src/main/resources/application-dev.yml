@@ -1,0 +1,36 @@
+
+spring:
+  datasource:
+    url: ${POSTGRES_DB_URL}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  data:
+    mongodb:
+      authentication-database: admin
+      username: ${MONGO_DB_USERNAME}
+      password: ${MONGO_DB_PASSWORD}
+      host: ${MONGO_DB_HOST}
+      port: ${MONGO_DB_PORT}
+      database: ${MONGO_DB_DATABASE}
+  main:
+    allow-bean-definition-overriding: true
+
+
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5431/chat
+#    username: postgres
+#    password: postgres
+#    driver-class-name: org.postgresql.Driver
+#  data:
+#    mongodb:
+#      authentication-database: admin
+#      username: root
+#      password: root
+#      host: localhost
+#      port: 9017
+#      database: chat
+#  main:
+#    allow-bean-definition-overriding: true
+#

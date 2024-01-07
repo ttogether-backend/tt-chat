@@ -1,0 +1,66 @@
+server:
+  port: 9004
+spring:
+  application:
+    name: tt-chat
+  profiles:
+    active: dev
+  main:
+    allow-bean-definition-overriding: true
+#  jpa:
+#    hibernate:
+#      ddl-auto: create
+
+eureka:
+  instance:
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${DISCOVERY_SERVICE_URL}
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        orm.jdbc.bind: TRACE
+      springframework:
+        data:
+          mongodb:
+            core:
+              MongoTemplate: DEBUG
+        web:
+          socket: DEBUG
+
+kafka:
+  bootstrapAddress: ${BOOTSTRAP_1}, ${BOOTSTRAP_2}, ${BOOTSTRAP_3}
+#  bootstrapAddress: localhost:9091, localhost:9092, localhost:9093
+  properties:
+    request.timeout.ms: 20000
+    retry.backoff.ms: 500
+  topic:
+    pub:
+      exit-chat: exit-chat
+      kick-chat: kick-chat
+      rollback:
+        create-member: rollback-create-member
+        update-member: rollback-update-member
+        open-accompany: rollback-open-accompany
+        join-accompany: rollback-join-accompany
+        exit-accompany: rollback-exit-accompany
+        kick-accompany: rollback-kick-accompany
+
+    sub:
+      together:
+        create-member: create-member
+        update-member: update-member
+        open-accompany: open-accompany
+        join-accompany: join-accompany
+        exit-accompany: exit-accompany
+        kick-accompany: kick-accompany
+      auth:
+        create-member: create-member
+      rollback:
+        exit-chat: rollback-exit-chat
+        kick-chat: rollback-kick-chat
