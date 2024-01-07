@@ -39,4 +39,8 @@ public class ChatRoomInfo {
 		this.lastMessageAt = lastMessageAt;
 		this.notReadCnt = notReadCnt;
 	}
+
+	public void updateTitleForGuestName(Member guest) {
+		this.chatRoomTitle = guest.getNickname();
+	}
 }

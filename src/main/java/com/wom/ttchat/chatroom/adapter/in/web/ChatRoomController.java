@@ -19,33 +19,35 @@ import com.wom.ttchat.message.domain.Message;
 import com.wom.ttchat.participant.application.service.RegisterParticipantService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @Tag(name = "채팅", description = "1:1채팅방 생성, 채팅방 목록 조회")
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/chat")
 public class ChatRoomController {
-
-    private final RegisterParticipantService registerParticipantService;
-    private final EnterChatRoomUseCase enterChatRoomUseCase;
-    private final QuitChatRoomUseCase quitChatRoomUseCase;
     private final CreateChatRoomUseCase createChatRoomUseCase;
-    private final SimpMessageSendingOperations simpMessageSendingOperations;
-    private final ChatRoomService chatRoomService;
-    private final WSMessageService wsMessageService;
     private final LoadChatRoomUseCase loadChatRoomUseCase;
     private final MessageUseCase messageUseCase;
 
-    @PostMapping("/create/direct")
-    ApiResponse<?> createDirectChat(@RequestBody ChatRequest req,
-                                    @RequestHeader("memberId") UUID hostId) throws Exception{
-        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateDirectRoom(req, hostId);
-        return ApiUtils.successCreateWithDataResponse(chatRoom);
+    @GetMapping("/chat-room/direct/{guestId}")
+    ApiResponse<?> findDirectChat(@RequestHeader("memberId") UUID hostId,
+                                  @PathVariable UUID guestId) throws Exception{
+//        ChatRoom chatRoom = createChatRoomUseCase.transactionalCreateDirectRoom(req, hostId);
+        UUID chatId = loadChatRoomUseCase.loadChatRoomByHostAndGuestId(hostId, guestId);
+        log.info("find chatroom : {}", chatId);
+        if (chatId == null) {
+            ChatRoom savedChat = createChatRoomUseCase.transactionalCreateDirectRoom(guestId, hostId);
+            chatId = savedChat.getChatRoomUUID();
+            log.info("new chat room is created, id = {}", savedChat.getChatRoomUUID());
+        }
+        return ApiUtils.successCreateWithDataResponse(chatId);
     }
 //
 //    @PostMapping("/room/enter")

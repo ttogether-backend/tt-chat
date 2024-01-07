@@ -17,6 +17,5 @@ public interface FindChatRoomPort {
     ChatRoom findByUid(UUID chatRoomUID) throws Exception;
     List<ChatRoomInfo> findChatRoomListByMemberId(MemberId memberId, PageRequest pageRequest);
     ChatRoom findByAccompanyPostId(Long accompanyPostId);
-    boolean isExistDirectRoomByHostAndGuestId(UUID hostId, UUID guestId);
-
+    UUID findUUIDByHostIdAndMemberId(UUID hostId, UUID guestId);
 }

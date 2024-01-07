@@ -11,14 +11,12 @@ import com.wom.ttchat.common.CommonCode;
 import com.wom.ttchat.common.annotation.PersistenceAdapter;
 import com.wom.ttchat.common.dto.PageRequest;
 import com.wom.ttchat.member.adapter.out.persistence.MemberMapper;
-import com.wom.ttchat.member.domain.Member;
 import com.wom.ttchat.member.domain.Member.MemberId;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,20 +28,37 @@ public class ChatRoomPersistenceAdapter implements SaveChatRoomPort, FindChatRoo
     private final ChatRoomMapper chatRoomMapper;
     private final MemberMapper memberMapper;
     @Override
-    public void saveChatRoom(ChatRoomJpaEntity chatRoomJpaEntity) throws Exception {
+    public void saveGroupChat(ChatRoomJpaEntity chatRoomJpaEntity) throws Exception {
         chatRoomJpaRepository.save(chatRoomJpaEntity);
     }
 
     @Override
-    public ChatRoom saveChatRoom(ChatRoom chatRoom) {
+    public ChatRoom saveGroupChat(ChatRoom chatRoom) {
         ChatRoomJpaEntity saved = chatRoomJpaRepository.save(
                 chatRoomMapper.mapToJpaEntity(
                 chatRoom,
-                memberMapper.mpaToJpaEntity(chatRoom.getHostMemberId())
+                memberMapper.mapToJpaEntity(chatRoom.getHostMemberId()),
+                        null
         ));
         return chatRoomMapper.mapToDomainEntity(
                 saved,
-                memberMapper.mapToDomainEntity(saved.getHostMemberId())
+                memberMapper.mapToDomainEntity(saved.getHostMemberId()),
+                null
+        );
+    }
+
+    @Override
+    public ChatRoom saveDirectChat(ChatRoom chatRoom) {
+        ChatRoomJpaEntity saved = chatRoomJpaRepository.save(
+                chatRoomMapper.mapToJpaEntity(
+                        chatRoom,
+                        memberMapper.mapToJpaEntity(chatRoom.getHostMemberId()),
+                        memberMapper.mapToJpaEntity(chatRoom.getPartMemberId())
+                ));
+        return chatRoomMapper.mapToDomainEntity(
+                saved,
+                memberMapper.mapToDomainEntity(saved.getHostMemberId()),
+                memberMapper.mapToDomainEntity(saved.getPartMemberId())
         );
     }
 
@@ -65,7 +80,9 @@ public class ChatRoomPersistenceAdapter implements SaveChatRoomPort, FindChatRoo
                                 CommonCode.NOT_FOUND_CHATROOM.getMessage()
                         )
                 );
-        return chatRoomMapper.mapToDomainEntity(chatRoomJpaEntity, memberMapper.mapToDomainEntity(chatRoomJpaEntity.getHostMemberId()));
+        return chatRoomMapper.mapToDomainEntity(
+                chatRoomJpaEntity, memberMapper.mapToDomainEntity(chatRoomJpaEntity.getHostMemberId()),
+                memberMapper.mapToDomainEntity(chatRoomJpaEntity.getPartMemberId()));
     }
 
     @Override
@@ -78,14 +95,15 @@ public class ChatRoomPersistenceAdapter implements SaveChatRoomPort, FindChatRoo
     public ChatRoom findByAccompanyPostId(Long accompanyPostId) {
         Optional<ChatRoomJpaEntity> chatRoomJpaEntity = chatRoomJpaRepository.findByAccompanyPostId(accompanyPostId);
         if (chatRoomJpaEntity.isPresent()) {
-            return chatRoomMapper.mapToDomainEntity(chatRoomJpaEntity.get(), memberMapper.mapToDomainEntity(chatRoomJpaEntity.get().getHostMemberId()));
+            return chatRoomMapper.mapToDomainEntity(
+                    chatRoomJpaEntity.get(), memberMapper.mapToDomainEntity(chatRoomJpaEntity.get().getHostMemberId()),
+                            memberMapper.mapToDomainEntity(chatRoomJpaEntity.get().getPartMemberId()));
         }
         return null;
     }
-
     @Override
-    public boolean isExistDirectRoomByHostAndGuestId(UUID hostId, UUID guestId) {
-        return chatRoomJpaRepository.isExistDirectRoomByHostAndGuestId(hostId, guestId);
+    public UUID findUUIDByHostIdAndMemberId(UUID hostId, UUID guestId) {
+        return chatRoomJpaRepository.findDirectRoomByHostAndGuestId(hostId, guestId);
     }
 
 

@@ -1,18 +1,17 @@
 package com.wom.ttchat.member.adapter.out.persistence;
 
-import com.wom.ttchat.chatroom.adapter.out.entity.ChatRoomJpaEntity;
 import com.wom.ttchat.member.domain.AccountStatus;
 import com.wom.ttchat.member.domain.CertificationStatus;
 import com.wom.ttchat.member.domain.Member;
 import com.wom.ttchat.member.domain.Member.MemberId;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public class MemberMapper {
 
 	public Member mapToDomainEntity(MemberJpaEntity jpaEntity) {
+		if (jpaEntity == null)
+			return null;
 		return Member.generateMember(
 			new MemberId(jpaEntity.getId()),
 			jpaEntity.getNickname(),
@@ -22,7 +21,9 @@ public class MemberMapper {
 			AccountStatus.valueOf(jpaEntity.getAccountStatus()));
 	}
 
-	public MemberJpaEntity mpaToJpaEntity(Member member) {
+	public MemberJpaEntity mapToJpaEntity(Member member) {
+		if (member == null)
+			return null;
 		return new MemberJpaEntity(
 			member.getId().getValue(),
 			member.getNickname(),

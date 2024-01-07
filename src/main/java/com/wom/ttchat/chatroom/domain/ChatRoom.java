@@ -19,6 +19,7 @@ public class ChatRoom {
     private String name;
     private Long accompanyPostId;
     private Member hostMemberId;
+    private Member partMemberId;
     private boolean isGroup;
     private LocalDateTime createdAt;
 
@@ -28,6 +29,7 @@ public class ChatRoom {
             String name,
             Long accompanyPostId,
             Member hostMemberId,
+            Member partMemberId,
             boolean isGroup,
             LocalDateTime createdAt
     ) {
@@ -37,6 +39,7 @@ public class ChatRoom {
                 name,
                 accompanyPostId,
                 hostMemberId,
+                partMemberId,
                 isGroup,
                 createdAt
         );

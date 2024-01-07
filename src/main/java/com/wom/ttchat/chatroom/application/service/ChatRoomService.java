@@ -8,10 +8,7 @@ import com.wom.ttchat.chatroom.adapter.in.web.reqeust.ChatRequest;
 import com.wom.ttchat.accompany.application.port.out.LoadAccompanyPort;
 import com.wom.ttchat.accompany.domain.Accompany;
 import com.wom.ttchat.chatroom.adapter.in.web.response.ChatRoomResponse;
-import com.wom.ttchat.chatroom.application.port.in.Command.BanChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.Command.CreateChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.Command.EnterChatRoomCommand;
-import com.wom.ttchat.chatroom.application.port.in.Command.QuitChatRoomCommand;
+import com.wom.ttchat.chatroom.application.port.in.Command.*;
 import com.wom.ttchat.chatroom.application.port.in.CreateChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.port.in.EnterChatRoomUseCase;
 import com.wom.ttchat.chatroom.application.port.in.LoadChatRoomUseCase;
@@ -89,11 +86,6 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     @Override
     @Transactional
     public Participant transactionalEnterChatRoom(EnterChatRoomCommand command) throws Exception {
-        // 챗DB에 accompany member 테이블이 없는 관계로 해당 기능 보류
-        // 테이블 못만드는 이유
-        // 테이블을 생성하더라도 MSA 설계원칙에 따라 동행 서비스에서 동행 멤버 생성 API 발송을 해주지 못함
-        // 또한 MSA 설계원칙에 따라 동행DB를 조회할 수 없음.
-        // boolean isMember =  isAccompanyMember(command);
         Participant participant = enterChatRoom(command);
         wsMessageService.saveMessage(MessageRequest.builder()
                 .roomId(command.getRoomId().toString())
@@ -127,12 +119,24 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     @Override
     public List<ChatRoomInfo> loadChatRoomList(MemberId memberId, PageRequest pageRequest) throws Exception {
         List<ChatRoomInfo> chatRoomInfoList = findChatRoomPort.findChatRoomListByMemberId(memberId, pageRequest);
-
+        List<ChatRoomInfo> result = new ArrayList<>();
         for(ChatRoomInfo info : chatRoomInfoList) {
             ChatRoom chatRoom = findChatRoomPort.findByUid(info.getRoomUid());
-
             Participant participantInfo = findParticipantPort.findParticipantByRoomIdAndMemberId(chatRoom, memberId);
 
+            Message lastSentMsg;
+            //강퇴당했을 경우 readAt<message_createAt<deleteAt
+            if (participantInfo.getStatus().toString().equals(ParticipantStatus.BANNED.name())) {
+                LocalDateTime banAt = participantInfo.getUpdatedAt();
+                lastSentMsg = null;
+            } else {
+                //마지막으로 읽은 메세지 정보 추가
+                lastSentMsg =
+                        findMessagePort.findLastSentMessage(info.getRoomUid());
+            }
+            if (lastSentMsg == null) {
+                continue;
+            }
             if (participantInfo==null)
                 throw new IllegalStateException(CommonCode.UNAUTHORIZED_ACCESS_CHATROOM.getMessage());
 
@@ -145,16 +149,8 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 else
                     readAt = participantInfo.getCreatedAt();
             }
-            Message lastSentMsg;
-            //강퇴당했을 경우 readAt<message_createAt<deleteAt
-            if (participantInfo.getStatus().toString().equals(ParticipantStatus.BANNED.name())) {
-                LocalDateTime banAt = participantInfo.getUpdatedAt();
-                lastSentMsg = null;
-            } else {
-                //마지막으로 읽은 메세지 정보 추가
-                lastSentMsg =
-                    findMessagePort.findLastSentMessage(info.getRoomUid());
-            }
+
+
             if(CommonUtils.isEmpty(lastSentMsg))
                 info.updateMessage(null, null, 0);
             else {
@@ -171,13 +167,17 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
 
             List<Member> members = new ArrayList<>();
             for (Participant participant : participantList) {
+                log.info("chat Title : {}, participant : {}", info.getChatRoomTitle(), participant.getMember().getNickname());
+                if (info.getChatRoomTitle() == null && !participant.getMember().getId().equals(memberId)) {
+                    info.updateTitleForGuestName(participant.getMember());
+                }
                 members.add(participant.getMember());
             }
             info.updateParticipantList(members);
-
+            result.add(info);
         }
 
-        return chatRoomInfoList;
+        return result;
     }
 
 
@@ -267,7 +267,7 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
     }
 
     @Override
-    public ChatRoom createRoom(CreateChatRoomCommand command) throws Exception {
+    public ChatRoom createGroupChat(CreateChatRoomCommand command) throws Exception {
         Member member = loadMemberPort.loadMember(command.getHostId());
 
         Accompany accompany = null;
@@ -290,13 +290,28 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
                 .name(room_name)
                 .isGroup(command.isGroup())
                 .build();
-        return saveChatRoomPort.saveChatRoom(chatRoom);
+        return saveChatRoomPort.saveGroupChat(chatRoom);
+    }
+
+    @Override
+    public ChatRoom createDirectChat(CreateDirectChatCommand command) throws Exception {
+        Member host = loadMemberPort.loadMember(command.getHostId());
+        Member guest = loadMemberPort.loadMember(command.getGuestId());
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .chatRoomUUID(UUID.randomUUID())
+                .createdAt(LocalDateTime.now())
+                .hostMemberId(host)
+                .partMemberId(guest)
+                .isGroup(false)
+                .build();
+        return saveChatRoomPort.saveDirectChat(chatRoom);
     }
 
     @Override
     @Transactional
     public ChatRoom transactionalCreateAccompanyRoom(ChatRequest req, UUID hostId) throws Exception {
-        ChatRoom chatRoom = createRoom(new CreateChatRoomCommand(
+        ChatRoom chatRoom = createGroupChat(new CreateChatRoomCommand(
                 new MemberId(hostId), req.getName(), ChatStat.GROUP.getStat(), req.getAccompanyPostId()
         ));
         enterChatRoom(new EnterChatRoomCommand(
@@ -307,29 +322,23 @@ public class ChatRoomService implements EnterChatRoomUseCase, LoadChatRoomUseCas
 
     @Override
     @Transactional
-    public ChatRoom transactionalCreateDirectRoom(ChatRequest req, UUID hostId) throws Exception{
-
-        ChatRoom chatRoom = createRoom(new CreateChatRoomCommand(
-                new MemberId(hostId), req.getName(), ChatStat.DIRECT.getStat(), req.getAccompanyPostId()
-        ));
-
-        if(req.getAccompanyPostId() == null && existDirectRoomByHostAndGuestId(hostId, req.getMemberId())){
-           throw new IllegalStateException("이미 만들어진 상대방과의 개인 채팅방이 있습니다.");
+    public ChatRoom transactionalCreateDirectRoom(UUID guestId, UUID hostId) throws Exception{
+        if (guestId == hostId) {
+            throw new IllegalStateException("스스로와 채팅방을 생성할 수 없습니다.");
         }
+        ChatRoom chatRoom = createDirectChat(new CreateDirectChatCommand(new MemberId(hostId), new MemberId(guestId)));
 
         enterChatRoom(new EnterChatRoomCommand(
                 new MemberId(hostId), chatRoom.getChatRoomUUID()
         ));
         enterChatRoom(new EnterChatRoomCommand(
-                new MemberId(req.getMemberId()), chatRoom.getChatRoomUUID()
+                new MemberId(guestId), chatRoom.getChatRoomUUID()
         ));
-
         return chatRoom;
     }
-
     @Override
-    public boolean existDirectRoomByHostAndGuestId(UUID hostId, UUID guestId) throws Exception {
-        return findChatRoomPort.isExistDirectRoomByHostAndGuestId(hostId, guestId);
+    public UUID loadChatRoomByHostAndGuestId(UUID hostId, UUID guestId) throws Exception {
+        return findChatRoomPort.findUUIDByHostIdAndMemberId(hostId, guestId);
     }
 
     public void joinChatRoom(JoinAccompanyEvent event) throws Exception {

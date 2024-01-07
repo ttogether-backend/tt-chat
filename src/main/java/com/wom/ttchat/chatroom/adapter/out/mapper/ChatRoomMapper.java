@@ -11,25 +11,27 @@ import java.util.List;
 
 @Component
 public class ChatRoomMapper {
-    public ChatRoom mapToDomainEntity(ChatRoomJpaEntity jpaEntity, Member member) {
+    public ChatRoom mapToDomainEntity(ChatRoomJpaEntity jpaEntity, Member hostMember, Member partMember) {
         return ChatRoom.of(
                 jpaEntity.getUid(),
                 jpaEntity.getId(),
                 jpaEntity.getName(),
                 jpaEntity.getAccompanyPostId(),
-                member,
+                hostMember,
+                partMember,
                 jpaEntity.isGroup(),
                 jpaEntity.getCreatedAt()
         );
     }
 
-    public ChatRoomJpaEntity mapToJpaEntity(ChatRoom chatRoom, MemberJpaEntity memberJpaEntity) {
+    public ChatRoomJpaEntity mapToJpaEntity(ChatRoom chatRoom, MemberJpaEntity hostMember, MemberJpaEntity partMember) {
         return new ChatRoomJpaEntity(
                 chatRoom.getChatRoomId(),
                 chatRoom.getChatRoomUUID(),
                 chatRoom.getName(),
                 chatRoom.getAccompanyPostId(),
-                memberJpaEntity,
+                hostMember,
+                partMember,
                 chatRoom.isGroup(),
                 chatRoom.getCreatedAt()
         );

@@ -77,7 +77,7 @@ public class ChatEventConsumer {
             accompanyService.registerAccompany(accompanyCommand);
 
             // 채팅방
-            chatRoomService.createRoom(new CreateChatRoomCommand(
+            chatRoomService.createGroupChat(new CreateChatRoomCommand(
                     memberId,
                     accompanyPostName,
                     true,
