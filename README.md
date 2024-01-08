@@ -1,6 +1,6 @@
 <br />
 <p align="center">
-<img src="https://drive.google.com/uc?id=1q-O4nCCoD7YdNcBNcE4fzXAMkcCfG3W1" width=500 /> <br />
+<img src="src/main/resources/static/tt-logo.png" width=500 /> <br />
 <b>투게더 트래블</b>은 음식, 여행, 취미 생활을 같이 즐길 동행인을 구하는 웹 서비스입니다.<br />
 </p>
 
